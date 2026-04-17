@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddrlbtfdyt0mr"]
+
+[ext_resource type="Script" path="res://ui/CardUI.gd" id="1_a0ipe"]
+
+[node name="CardUI" type="Button"]
+custom_minimum_size = Vector2(220, 320)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -160.0
+offset_right = 110.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a0ipe")
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CardImage" type="TextureRect" parent="ContentMargin"]
+custom_minimum_size = Vector2(220, 320)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1

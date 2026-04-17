@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://cc0kqsohm1036"]
+
+[ext_resource type="Script" path="res://TitleScreen.gd" id="1_iwpe1"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_iwpe1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.313726, 0.14902, 0.0196078, 1)
+
+[node name="MainLayout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopSpacer" type="Control" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TitleLabel" type="Label" parent="MainLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Dungeons & Degenerates"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="MainLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Prototype Demo"
+horizontal_alignment = 1
+
+[node name="MiddleSpacer" type="Control" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonCenter" type="CenterContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(280, 90)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="MainLayout/ButtonCenter"]
+custom_minimum_size = Vector2(200, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 27
+text = "Start Game"
+
+[node name="BottomSpacer" type="Control" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[connection signal="pressed" from="MainLayout/ButtonCenter/StartButton" to="." method="_on_start_button_pressed"]

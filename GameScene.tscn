@@ -1,0 +1,216 @@
+[gd_scene load_steps=2 format=3 uid="uid://jjc76p331ucb"]
+
+[ext_resource type="Script" path="res://GameScene.gd" id="1_a5slx"]
+
+[node name="GameScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a5slx")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.192157, 0.101961, 0.0235294, 1)
+
+[node name="MainLayout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopSpacer" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="Spacer4" type="Control" parent="MainLayout/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExitButton" type="Button" parent="MainLayout/TopBar"]
+layout_mode = 2
+text = "Exit"
+
+[node name="Spacer3" type="Control" parent="MainLayout/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RoundLabel" type="Label" parent="MainLayout/TopBar"]
+layout_mode = 2
+text = "Round 1"
+
+[node name="Spacer" type="Control" parent="MainLayout/TopBar"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+
+[node name="RestartButton" type="Button" parent="MainLayout/TopBar"]
+layout_mode = 2
+text = "Restart"
+
+[node name="Spacer2" type="Control" parent="MainLayout/TopBar"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ScenarioPanel" type="PanelContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+
+[node name="ScenarioCardImage" type="TextureRect" parent="MainLayout/ScenarioPanel"]
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Spacer2" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="AIPlayersRow" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLayout/AIPlayersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AI1Panel" type="HBoxContainer" parent="MainLayout/AIPlayersRow"]
+layout_mode = 2
+
+[node name="A1Name" type="Label" parent="MainLayout/AIPlayersRow/AI1Panel"]
+layout_mode = 2
+text = "Frankie"
+
+[node name="AI1Score" type="Label" parent="MainLayout/AIPlayersRow/AI1Panel"]
+layout_mode = 2
+text = "0"
+
+[node name="Spacer2" type="Control" parent="MainLayout/AIPlayersRow"]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AI2Panel" type="HBoxContainer" parent="MainLayout/AIPlayersRow"]
+layout_mode = 2
+
+[node name="AI2Nam" type="Label" parent="MainLayout/AIPlayersRow/AI2Panel"]
+layout_mode = 2
+text = "Steven"
+
+[node name="AI2Score" type="Label" parent="MainLayout/AIPlayersRow/AI2Panel"]
+layout_mode = 2
+text = "0"
+
+[node name="Spacer3" type="Control" parent="MainLayout/AIPlayersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Spacer3" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="CenterArea" type="PanelContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="CenterVBox" type="VBoxContainer" parent="MainLayout/CenterArea"]
+layout_mode = 2
+
+[node name="PlayedCardsRow" type="HBoxContainer" parent="MainLayout/CenterArea/CenterVBox"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerPlayedPanel" type="PanelContainer" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow"]
+layout_mode = 2
+
+[node name="PlayerPlayed" type="Label" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow/PlayerPlayedPanel"]
+custom_minimum_size = Vector2(220, 120)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="AI1PlayedPanel" type="PanelContainer" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow"]
+layout_mode = 2
+
+[node name="AI1Played" type="Label" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow/AI1PlayedPanel"]
+custom_minimum_size = Vector2(220, 120)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="AI2PlayedPanel" type="PanelContainer" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow"]
+layout_mode = 2
+
+[node name="AI2Played" type="Label" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow/AI2PlayedPanel"]
+custom_minimum_size = Vector2(220, 120)
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer2" type="Control" parent="MainLayout/CenterArea/CenterVBox/PlayedCardsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RoundResult" type="Label" parent="MainLayout/CenterArea/CenterVBox"]
+custom_minimum_size = Vector2(220, 30)
+layout_mode = 2
+text = "Waiting for play..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="PlayerPanel" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLayout/PlayerPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerName" type="Label" parent="MainLayout/PlayerPanel"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "IXgEnI"
+
+[node name="Spacer3" type="Control" parent="MainLayout/PlayerPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerScore" type="Label" parent="MainLayout/PlayerPanel"]
+layout_mode = 2
+text = "0"
+horizontal_alignment = 2
+
+[node name="Spacer2" type="Control" parent="MainLayout/PlayerPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Spacer5" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="PlayerHand" type="FlowContainer" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomSpacer" type="Control" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
