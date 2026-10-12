@@ -1,6 +1,6 @@
 # Dungeons & Degenerates (Web)
 
-Humorous fantasy party card game — absurd **Scenario** cards, ridiculous **Action** responses, rotating **Judge**, and **Loot Tokens**.
+Humorous fantasy party card game — absurd **Scenario** cards, ridiculous **Action** responses, rotating **Judge**, anonymous reveals, and **Loot Tokens**.
 
 Tone: Cards Against Humanity meets Jackbox with light RPG flavor.
 
@@ -19,8 +19,9 @@ Open the URL Vite prints (default http://localhost:5173).
 1. Each player gets a **Role** (Barbarian / Rogue / Bard) and **7 Action** cards.
 2. A **Scenario** is revealed.
 3. The **Judge** rotates each round and does not play. The other two submit face-down Actions.
-4. Cards flip one at a time, then the Judge picks the winner.
-5. Winner takes **1 Loot Token**. First to **5** wins the match.
+4. Cards flip one at a time on **anonymous slots** — no names until someone wins.
+5. The Judge picks the winning Action by content only.
+6. Winner takes **1 Loot Token**. First to **5** wins the match.
 
 Vs 2 local AI opponents (Sir Regrettable & Lady Chaos).
 

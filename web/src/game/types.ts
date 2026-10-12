@@ -14,7 +14,13 @@ export interface PlayerState {
   role: Role
   hand: CardData[]
   loot: number
-  played: CardData | null
+}
+
+/** Anonymous table slot — owner is hidden until a winner is named. */
+export interface SubmissionSlot {
+  slotId: string
+  ownerId: PlayerId
+  card: CardData
   revealed: boolean
 }
 
@@ -35,10 +41,15 @@ export interface GameState {
   players: Record<PlayerId, PlayerState>
   judgeId: PlayerId
   actionPile: CardData[]
+  actionDiscard: CardData[]
   scenarioPile: CardData[]
-  revealQueue: PlayerId[]
+  scenarioDiscard: CardData[]
+  /** Shuffled anonymous submission slots for this round */
+  submissions: SubmissionSlot[]
   revealIndex: number
   lastWinner: PlayerId | null
+  /** Winning slot id (for brief highlight before naming) */
+  lastWinningSlotId: string | null
   statusText: string
 }
 

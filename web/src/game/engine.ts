@@ -10,6 +10,7 @@ import {
   type Phase,
   type PlayerId,
   type PlayerState,
+  type SubmissionSlot,
 } from './types'
 
 function shuffle<T>(items: T[]): T[] {
@@ -25,28 +26,41 @@ function cloneCards(cards: CardData[]): CardData[] {
   return cards.map((c) => ({ ...c }))
 }
 
-function drawOne(pile: CardData[], master: CardData[]): { card: CardData; pile: CardData[] } {
-  let next = [...pile]
-  if (next.length === 0) {
-    next = shuffle(cloneCards(master))
+function drawOne(
+  pile: CardData[],
+  discard: CardData[],
+  master: CardData[],
+): { card: CardData; pile: CardData[]; discard: CardData[] } {
+  let nextPile = [...pile]
+  let nextDiscard = [...discard]
+  if (nextPile.length === 0) {
+    if (nextDiscard.length > 0) {
+      nextPile = shuffle(nextDiscard)
+      nextDiscard = []
+    } else {
+      nextPile = shuffle(cloneCards(master))
+    }
   }
-  const card = next.pop()!
-  return { card, pile: next }
+  const card = nextPile.pop()!
+  return { card, pile: nextPile, discard: nextDiscard }
 }
 
 function drawMany(
   pile: CardData[],
+  discard: CardData[],
   master: CardData[],
   count: number,
-): { cards: CardData[]; pile: CardData[] } {
+): { cards: CardData[]; pile: CardData[]; discard: CardData[] } {
   let nextPile = pile
+  let nextDiscard = discard
   const cards: CardData[] = []
   for (let i = 0; i < count; i += 1) {
-    const drawn = drawOne(nextPile, master)
+    const drawn = drawOne(nextPile, nextDiscard, master)
     cards.push(drawn.card)
     nextPile = drawn.pile
+    nextDiscard = drawn.discard
   }
-  return { cards, pile: nextPile }
+  return { cards, pile: nextPile, discard: nextDiscard }
 }
 
 function assignRoles(): Record<PlayerId, Role> {
@@ -67,6 +81,16 @@ function participants(judgeId: PlayerId): PlayerId[] {
   return PLAYER_ORDER.filter((id) => id !== judgeId)
 }
 
+function emptyPlayer(id: PlayerId, name: string): PlayerState {
+  return {
+    id,
+    name,
+    role: ROLES[0],
+    hand: [],
+    loot: 0,
+  }
+}
+
 export function createInitialState(): GameState {
   return {
     phase: 'title',
@@ -79,23 +103,14 @@ export function createInitialState(): GameState {
     },
     judgeId: 'you',
     actionPile: [],
+    actionDiscard: [],
     scenarioPile: [],
-    revealQueue: [],
+    scenarioDiscard: [],
+    submissions: [],
     revealIndex: 0,
     lastWinner: null,
+    lastWinningSlotId: null,
     statusText: '',
-  }
-}
-
-function emptyPlayer(id: PlayerId, name: string): PlayerState {
-  return {
-    id,
-    name,
-    role: ROLES[0],
-    hand: [],
-    loot: 0,
-    played: null,
-    revealed: false,
   }
 }
 
@@ -105,24 +120,25 @@ export function startMatch(): GameState {
   const scenarioMaster = cloneCards(scenarios as CardData[])
   let actionPile = shuffle(actionMaster)
   let scenarioPile = shuffle(scenarioMaster)
+  const actionDiscard: CardData[] = []
+  const scenarioDiscard: CardData[] = []
+
+  const names: Record<PlayerId, string> = {
+    you: 'You',
+    ai1: 'Sir Regrettable',
+    ai2: 'Lady Chaos',
+  }
 
   const players = {} as Record<PlayerId, PlayerState>
   for (const id of PLAYER_ORDER) {
-    const drawn = drawMany(actionPile, actionMaster, HAND_SIZE)
+    const drawn = drawMany(actionPile, actionDiscard, actionMaster, HAND_SIZE)
     actionPile = drawn.pile
-    const names: Record<PlayerId, string> = {
-      you: 'You',
-      ai1: 'Sir Regrettable',
-      ai2: 'Lady Chaos',
-    }
     players[id] = {
       id,
       name: names[id],
       role: roles[id],
       hand: drawn.cards,
       loot: 0,
-      played: null,
-      revealed: false,
     }
   }
 
@@ -133,30 +149,52 @@ export function startMatch(): GameState {
     players,
     judgeId: 'you',
     actionPile,
+    actionDiscard,
     scenarioPile,
-    revealQueue: [],
+    scenarioDiscard,
+    submissions: [],
     revealIndex: 0,
     lastWinner: null,
+    lastWinningSlotId: null,
     statusText: 'Dealing chaos…',
   }
 
   return beginRound(base)
 }
 
+/** Pending plays staged by owner before anonymous slot assignment. */
+type PendingPlays = Partial<Record<PlayerId, CardData>>
+
+function getPending(state: GameState): PendingPlays {
+  const pending: PendingPlays = {}
+  for (const sub of state.submissions) {
+    pending[sub.ownerId] = sub.card
+  }
+  return pending
+}
+
+function setPending(state: GameState, pending: PendingPlays): GameState {
+  // Keep face-down anonymous placeholders only for submitted cards, shuffled
+  const owners = Object.keys(pending) as PlayerId[]
+  const submissions: SubmissionSlot[] = shuffle(owners).map((ownerId, i) => ({
+    slotId: `slot_${i}`,
+    ownerId,
+    card: pending[ownerId]!,
+    revealed: false,
+  }))
+  return { ...state, submissions }
+}
+
 export function beginRound(state: GameState): GameState {
   const scenarioMaster = scenarios as CardData[]
-  const drawn = drawOne(state.scenarioPile, scenarioMaster)
-  const players = { ...state.players }
-  for (const id of PLAYER_ORDER) {
-    players[id] = {
-      ...players[id],
-      played: null,
-      revealed: false,
-    }
+  let scenarioDiscard = state.scenarioDiscard
+  if (state.scenario) {
+    scenarioDiscard = [...scenarioDiscard, state.scenario]
   }
+  const drawn = drawOne(state.scenarioPile, scenarioDiscard, scenarioMaster)
 
   const judgeId = state.round === 0 ? 'you' : nextJudge(state.judgeId)
-  const judgeName = players[judgeId].name
+  const judgeName = state.players[judgeId].name
   const isPlayerJudge = judgeId === 'you'
 
   return {
@@ -165,37 +203,47 @@ export function beginRound(state: GameState): GameState {
     round: state.round + 1,
     scenario: drawn.card,
     scenarioPile: drawn.pile,
-    players,
-    judgeId,
-    revealQueue: [],
+    scenarioDiscard: drawn.discard,
+    submissions: [],
     revealIndex: 0,
     lastWinner: null,
+    lastWinningSlotId: null,
+    judgeId,
     statusText: isPlayerJudge
-      ? `You are the Judge. Waiting for degenerates to play…`
+      ? 'You are the Judge. Waiting for anonymous submissions…'
       : `${judgeName} is judging. Play your most unhinged Action.`,
   }
 }
 
-/** When player is judge, AI auto-plays after a beat. */
 export function autoPlayNonJudges(state: GameState): GameState {
   if (state.phase !== 'waiting' && state.phase !== 'selecting') return state
+
+  const pending = getPending(state)
   const players = { ...state.players }
+
   for (const id of participants(state.judgeId)) {
     if (id === 'you') continue
-    if (players[id].played) continue
+    if (pending[id]) continue
     const hand = [...players[id].hand]
     if (hand.length === 0) continue
-    const pick = Math.floor(Math.random() * hand.length)
+    // Prefer keyword-ish picks vs random for a bit of flavor
+    const pick = pickAiActionIndex(hand, state.scenario)
     const [card] = hand.splice(pick, 1)
-    players[id] = { ...players[id], hand, played: card, revealed: false }
+    players[id] = { ...players[id], hand }
+    pending[id] = card
   }
 
-  const allIn = participants(state.judgeId).every((id) => players[id].played)
+  let next = setPending({ ...state, players }, pending)
+  const allIn = participants(state.judgeId).every((id) => Boolean(pending[id]))
   if (!allIn) {
-    return { ...state, players, phase: 'waiting', statusText: 'Degenerates are scheming…' }
+    return {
+      ...next,
+      phase: 'waiting',
+      statusText: 'Degenerates are scheming face-down…',
+    }
   }
 
-  return startReveal({ ...state, players })
+  return startReveal(next)
 }
 
 export function playPlayerCard(state: GameState, handIndex: number): GameState {
@@ -207,53 +255,66 @@ export function playPlayerCard(state: GameState, handIndex: number): GameState {
 
   const hand = [...you.hand]
   const [card] = hand.splice(handIndex, 1)
+  const pending = getPending(state)
+  pending.you = card
+
   const players = {
     ...state.players,
-    you: { ...you, hand, played: card, revealed: false },
+    you: { ...you, hand },
   }
 
-  // AI plays immediately after (timing handled in UI)
-  return { ...state, players, phase: 'waiting', statusText: 'Cards hit the table face-down…' }
+  return setPending(
+    {
+      ...state,
+      players,
+      phase: 'waiting',
+      statusText: 'Card locked face-down. Waiting for the table…',
+    },
+    pending,
+  )
 }
 
 function startReveal(state: GameState): GameState {
-  const queue = shuffle(participants(state.judgeId))
+  // Re-shuffle slot order at reveal start so submit order ≠ reveal order
+  const reshuffled = shuffle(state.submissions).map((s, i) => ({
+    ...s,
+    slotId: `slot_${i}`,
+    revealed: false,
+  }))
   return {
     ...state,
     phase: 'revealing',
-    revealQueue: queue,
+    submissions: reshuffled,
     revealIndex: 0,
-    statusText: 'Revealing submissions…',
+    statusText: 'Revealing a card…',
   }
 }
 
 export function revealNext(state: GameState): GameState {
   if (state.phase !== 'revealing') return state
-  const id = state.revealQueue[state.revealIndex]
-  if (!id) {
+  if (state.revealIndex >= state.submissions.length) {
     return enterJudging(state)
   }
 
-  const players = {
-    ...state.players,
-    [id]: { ...state.players[id], revealed: true },
-  }
+  const submissions = state.submissions.map((s, i) =>
+    i === state.revealIndex ? { ...s, revealed: true } : s,
+  )
   const nextIndex = state.revealIndex + 1
-  const done = nextIndex >= state.revealQueue.length
+  const done = nextIndex >= submissions.length
 
   if (done) {
     return enterJudging({
       ...state,
-      players,
+      submissions,
       revealIndex: nextIndex,
     })
   }
 
   return {
     ...state,
-    players,
+    submissions,
     revealIndex: nextIndex,
-    statusText: `${players[id].name} reveals…`,
+    statusText: 'Revealing next card…',
   }
 }
 
@@ -264,21 +325,37 @@ function enterJudging(state: GameState): GameState {
     phase: 'judging',
     statusText:
       state.judgeId === 'you'
-        ? 'Judge the chaos. Pick the winning Action.'
-        : `${judge.name} is judging…`,
+        ? 'Judge the chaos. Pick the winning Action — identities stay hidden.'
+        : `${judge.name} is judging in secret…`,
   }
+}
+
+export function judgePickBySlot(state: GameState, slotId: string): GameState {
+  if (state.phase !== 'judging') return state
+  const slot = state.submissions.find((s) => s.slotId === slotId)
+  if (!slot || !slot.revealed) return state
+  if (slot.ownerId === state.judgeId) return state
+  return finalizeWinner(state, slot.ownerId, slot.slotId)
 }
 
 export function judgePick(state: GameState, winnerId: PlayerId): GameState {
   if (state.phase !== 'judging') return state
   if (winnerId === state.judgeId) return state
-  if (!state.players[winnerId].played) return state
+  const slot = state.submissions.find((s) => s.ownerId === winnerId && s.revealed)
+  if (!slot) return state
+  return finalizeWinner(state, winnerId, slot.slotId)
+}
 
+function finalizeWinner(state: GameState, winnerId: PlayerId, slotId: string): GameState {
   const players = { ...state.players }
   players[winnerId] = {
     ...players[winnerId],
     loot: players[winnerId].loot + 1,
   }
+
+  // Discard played actions
+  const playedCards = state.submissions.map((s) => s.card)
+  const actionDiscard = [...state.actionDiscard, ...playedCards]
 
   const winner = players[winnerId]
   const victory = winner.loot >= LOOT_TO_WIN
@@ -286,7 +363,9 @@ export function judgePick(state: GameState, winnerId: PlayerId): GameState {
   return {
     ...state,
     players,
+    actionDiscard,
     lastWinner: winnerId,
+    lastWinningSlotId: slotId,
     phase: victory ? 'victory' : 'roundResult',
     statusText: victory
       ? `${winner.name} wins the match with ${winner.loot} Loot Tokens!`
@@ -294,11 +373,48 @@ export function judgePick(state: GameState, winnerId: PlayerId): GameState {
   }
 }
 
+/** Keyword-flavored AI judge — still chaotic, slightly thematic. */
 export function aiJudgePick(state: GameState): GameState {
   if (state.phase !== 'judging' || state.judgeId === 'you') return state
-  const options = participants(state.judgeId)
-  const winnerId = options[Math.floor(Math.random() * options.length)]
-  return judgePick(state, winnerId)
+  const options = state.submissions.filter((s) => s.revealed)
+  if (options.length === 0) return state
+
+  const scenarioText = (state.scenario?.text ?? '').toLowerCase()
+  const scored = options.map((s) => {
+    const text = s.card.text.toLowerCase()
+    let score = Math.random() * 2
+    const keywords = scenarioText.split(/[^a-z]+/).filter((w) => w.length > 4)
+    for (const k of keywords) {
+      if (text.includes(k)) score += 1.5
+    }
+    // Humor bias keywords
+    for (const funny of ['seduce', 'chair', 'blame', 'drink', 'fake', 'curse', 'scream', 'gold']) {
+      if (text.includes(funny)) score += 0.4
+    }
+    return { slot: s, score }
+  })
+  scored.sort((a, b) => b.score - a.score)
+  return finalizeWinner(state, scored[0].slot.ownerId, scored[0].slot.slotId)
+}
+
+function pickAiActionIndex(hand: CardData[], scenario: CardData | null): number {
+  if (hand.length === 0) return 0
+  const scenarioText = (scenario?.text ?? '').toLowerCase()
+  const keywords = scenarioText.split(/[^a-z]+/).filter((w) => w.length > 4)
+  let best = 0
+  let bestScore = -1
+  for (let i = 0; i < hand.length; i += 1) {
+    const text = hand[i].text.toLowerCase()
+    let score = Math.random()
+    for (const k of keywords) {
+      if (text.includes(k)) score += 1.2
+    }
+    if (score > bestScore) {
+      bestScore = score
+      best = i
+    }
+  }
+  return best
 }
 
 export function advanceAfterRound(state: GameState): GameState {
@@ -306,17 +422,19 @@ export function advanceAfterRound(state: GameState): GameState {
 
   const actionMaster = actions as CardData[]
   let actionPile = state.actionPile
+  let actionDiscard = state.actionDiscard
   const players = { ...state.players }
 
+  // Contenders already discarded their played cards in finalizeWinner.
+  // Refill everyone who is short (judge didn't play, so only needs top-up if somehow short).
   for (const id of PLAYER_ORDER) {
     const p = players[id]
     const need = HAND_SIZE - p.hand.length
     if (need > 0) {
-      const drawn = drawMany(actionPile, actionMaster, need)
+      const drawn = drawMany(actionPile, actionDiscard, actionMaster, need)
       actionPile = drawn.pile
-      players[id] = { ...p, hand: [...p.hand, ...drawn.cards], played: null, revealed: false }
-    } else {
-      players[id] = { ...p, played: null, revealed: false }
+      actionDiscard = drawn.discard
+      players[id] = { ...p, hand: [...p.hand, ...drawn.cards] }
     }
   }
 
@@ -324,6 +442,8 @@ export function advanceAfterRound(state: GameState): GameState {
     ...state,
     players,
     actionPile,
+    actionDiscard,
+    submissions: [],
   })
 }
 
@@ -337,4 +457,12 @@ export function isPlayable(state: GameState): boolean {
 
 export function canJudge(state: GameState): boolean {
   return state.phase === 'judging' && state.judgeId === 'you'
+}
+
+export function submittedCount(state: GameState): number {
+  return state.submissions.length
+}
+
+export function expectedSubmitters(state: GameState): number {
+  return participants(state.judgeId).length
 }
