@@ -1,0 +1,1012 @@
+[
+  {
+    "id": 0,
+    "text": "Kick the door open dramatically.",
+    "image": "000.png"
+  },
+  {
+    "id": 1,
+    "text": "Throw a torch at the nearest goblin.",
+    "image": "001.png"
+  },
+  {
+    "id": 2,
+    "text": "Cast a questionable spell.",
+    "image": "002.png"
+  },
+  {
+    "id": 3,
+    "text": "Swing wildly and hope for the best.",
+    "image": "003.png"
+  },
+  {
+    "id": 4,
+    "text": "Challenge the enemy to single combat.",
+    "image": "004.png"
+  },
+  {
+    "id": 5,
+    "text": "Give a heroic speech. Badly.",
+    "image": "005.png"
+  },
+  {
+    "id": 6,
+    "text": "Hide behind the biggest warrior.",
+    "image": "006.png"
+  },
+  {
+    "id": 7,
+    "text": "Use a ridiculous distraction.",
+    "image": "007.png"
+  },
+  {
+    "id": 8,
+    "text": "Roll a perfect strike and act humble.",
+    "image": "008.png"
+  },
+  {
+    "id": 9,
+    "text": "Summon something suspicious.",
+    "image": "009.png"
+  },
+  {
+    "id": 10,
+    "text": "Blame the wizard immediately.",
+    "image": "010.png"
+  },
+  {
+    "id": 11,
+    "text": "Run forward screaming.",
+    "image": "011.png"
+  },
+  {
+    "id": 12,
+    "text": "Use diplomacy first. Then throw something.",
+    "image": "012.png"
+  },
+  {
+    "id": 13,
+    "text": "Throw sand in someone's eyes.",
+    "image": "013.png"
+  },
+  {
+    "id": 14,
+    "text": "Approach with questionable stealth.",
+    "image": "014.png"
+  },
+  {
+    "id": 15,
+    "text": "Start an inspiring chant.",
+    "image": "015.png"
+  },
+  {
+    "id": 16,
+    "text": "Throw a chair with purpose.",
+    "image": "016.png"
+  },
+  {
+    "id": 17,
+    "text": "Activate mysterious magic.",
+    "image": "017.png"
+  },
+  {
+    "id": 18,
+    "text": "Demand respect from the ered in a really loud voice.",
+    "image": "018.png"
+  },
+  {
+    "id": 19,
+    "text": "Perform a daring leap.",
+    "image": "019.png"
+  },
+  {
+    "id": 20,
+    "text": "Slide across the floor in style.",
+    "image": "020.png"
+  },
+  {
+    "id": 21,
+    "text": "Point confidently at nothing.",
+    "image": "021.png"
+  },
+  {
+    "id": 22,
+    "text": "Unleash a battle cry.",
+    "image": "022.png"
+  },
+  {
+    "id": 23,
+    "text": "Feign death. Very badly.",
+    "image": "023.png"
+  },
+  {
+    "id": 24,
+    "text": "Trip the nearest villain.",
+    "image": "024.png"
+  },
+  {
+    "id": 25,
+    "text": "Knock over something expensive.",
+    "image": "025.png"
+  },
+  {
+    "id": 26,
+    "text": "Climb onto the table.",
+    "image": "026.png"
+  },
+  {
+    "id": 27,
+    "text": "Kick the torch stand over.",
+    "image": "027.png"
+  },
+  {
+    "id": 28,
+    "text": "Roar louder than necessary.",
+    "image": "028.png"
+  },
+  {
+    "id": 29,
+    "text": "Loudly bargain with a diety you just met.",
+    "image": "029.png"
+  },
+  {
+    "id": 30,
+    "text": "Charge with reckless confidence.",
+    "image": "030.png"
+  },
+  {
+    "id": 31,
+    "text": "Draw a second blade. Then a third, Somewhere, a fourth.",
+    "image": "031.png"
+  },
+  {
+    "id": 32,
+    "text": "Point outa tactical weakness in a condescending way.",
+    "image": "032.png"
+  },
+  {
+    "id": 33,
+    "text": "Confuse the enemy with nonsense.",
+    "image": "033.png"
+  },
+  {
+    "id": 34,
+    "text": "Chaotic action #34.",
+    "image": "034.png"
+  },
+  {
+    "id": 35,
+    "text": "Accidentally start a fire.",
+    "image": "035.png"
+  },
+  {
+    "id": 36,
+    "text": "Offer a duel to the strongest foe.",
+    "image": "036.png"
+  },
+  {
+    "id": 37,
+    "text": "Use a rope inappropriately.",
+    "image": "037.png"
+  },
+  {
+    "id": 38,
+    "text": "Grab the loot and run.",
+    "image": "038.png"
+  },
+  {
+    "id": 39,
+    "text": "Sneak attack in full view.",
+    "image": "039.png"
+  },
+  {
+    "id": 40,
+    "text": "Laugh in the face of danger.",
+    "image": "040.png"
+  },
+  {
+    "id": 41,
+    "text": "Trip over a skeleton dramatically.",
+    "image": "041.png"
+  },
+  {
+    "id": 42,
+    "text": "Stab first, apologize later.",
+    "image": "042.png"
+  },
+  {
+    "id": 43,
+    "text": "Clap sarcastically at the villain.",
+    "image": "043.png"
+  },
+  {
+    "id": 44,
+    "text": "Break into a battle dance.",
+    "image": "044.png"
+  },
+  {
+    "id": 45,
+    "text": "Claim this was part of the plan.",
+    "image": "045.png"
+  },
+  {
+    "id": 46,
+    "text": "Use a shield as a sled.",
+    "image": "046.png"
+  },
+  {
+    "id": 47,
+    "text": "Insult the dragon's scales.",
+    "image": "047.png"
+  },
+  {
+    "id": 48,
+    "text": "Demand better odds from the universe.",
+    "image": "048.png"
+  },
+  {
+    "id": 49,
+    "text": "Swing from a chandelier.",
+    "image": "049.png"
+  },
+  {
+    "id": 50,
+    "text": "Kick the treasure chest.",
+    "image": "050.png"
+  },
+  {
+    "id": 51,
+    "text": "Open the suspicious door anyway.",
+    "image": "051.png"
+  },
+  {
+    "id": 52,
+    "text": "Blow a horn at the wrong time.",
+    "image": "052.png"
+  },
+  {
+    "id": 53,
+    "text": "Wave a torch like a maniac.",
+    "image": "053.png"
+  },
+  {
+    "id": 54,
+    "text": "Throw a dagger at the map.",
+    "image": "054.png"
+  },
+  {
+    "id": 55,
+    "text": "Grab the nearest improvised weapon.",
+    "image": "055.png"
+  },
+  {
+    "id": 56,
+    "text": "Challenge fate directly. And lose.",
+    "image": "056.png"
+  },
+  {
+    "id": 57,
+    "text": "Kick the goblin king off his chair.",
+    "image": "057.png"
+  },
+  {
+    "id": 58,
+    "text": "Crash through a window heroically.",
+    "image": "058.png"
+  },
+  {
+    "id": 59,
+    "text": "Light the fuse and walk away.",
+    "image": "059.png"
+  },
+  {
+    "id": 60,
+    "text": "Punch the problem. Literally.",
+    "image": "060.png"
+  },
+  {
+    "id": 61,
+    "text": "Shout ancient nonsense.",
+    "image": "061.png"
+  },
+  {
+    "id": 62,
+    "text": "Throw your hat for emphasis.",
+    "image": "062.png"
+  },
+  {
+    "id": 63,
+    "text": "Swing your weapon like a frantic ceiling fan.",
+    "image": "063.png"
+  },
+  {
+    "id": 64,
+    "text": "Duck at the wrong moment.",
+    "image": "064.png"
+  },
+  {
+    "id": 65,
+    "text": "Use the goblin as cover.",
+    "image": "065.png"
+  },
+  {
+    "id": 66,
+    "text": "Shove the barbarian forward.",
+    "image": "066.png"
+  },
+  {
+    "id": 67,
+    "text": "Read the runes out loud.",
+    "image": "067.png"
+  },
+  {
+    "id": 68,
+    "text": "Knock over the cauldron.",
+    "image": "068.png"
+  },
+  {
+    "id": 69,
+    "text": "Threaten the bridge troll.",
+    "image": "069.png"
+  },
+  {
+    "id": 70,
+    "text": "Announce your title with force.",
+    "image": "070.png"
+  },
+  {
+    "id": 71,
+    "text": "Set the trap off on purpose.",
+    "image": "071.png"
+  },
+  {
+    "id": 72,
+    "text": "Leap onto the wagon.",
+    "image": "072.png"
+  },
+  {
+    "id": 73,
+    "text": "Kick the barrel downhill.",
+    "image": "073.png"
+  },
+  {
+    "id": 74,
+    "text": "Start the duel before it begins.",
+    "image": "074.png"
+  },
+  {
+    "id": 75,
+    "text": "Draw a circle and call it strategy.",
+    "image": "075.png"
+  },
+  {
+    "id": 76,
+    "text": "Offer a toast before battle.",
+    "image": "076.png"
+  },
+  {
+    "id": 77,
+    "text": "Snap the wand in half.",
+    "image": "077.png"
+  },
+  {
+    "id": 78,
+    "text": "Use the helmet as a weapon.",
+    "image": "078.png"
+  },
+  {
+    "id": 79,
+    "text": "Climb the statue for high ground.",
+    "image": "079.png"
+  },
+  {
+    "id": 80,
+    "text": "Intimidate a ghost. It does not go well.",
+    "image": "080.png"
+  },
+  {
+    "id": 81,
+    "text": "Throw a chicken for confusion.",
+    "image": "081.png"
+  },
+  {
+    "id": 82,
+    "text": "Draw steel and grin.",
+    "image": "082.png"
+  },
+  {
+    "id": 83,
+    "text": "Grab the glowing artifact.",
+    "image": "083.png"
+  },
+  {
+    "id": 84,
+    "text": "Shove the door with both feet.",
+    "image": "084.png"
+  },
+  {
+    "id": 85,
+    "text": "Shatter the bottle dramatically.",
+    "image": "085.png"
+  },
+  {
+    "id": 86,
+    "text": "Wave the banner and charge.",
+    "image": "086.png"
+  },
+  {
+    "id": 87,
+    "text": "Roll under the giant's swing.",
+    "image": "087.png"
+  },
+  {
+    "id": 88,
+    "text": "Steal the villain's monologue.",
+    "image": "088.png"
+  },
+  {
+    "id": 89,
+    "text": "Throw a plate with deadly intent.",
+    "image": "089.png"
+  },
+  {
+    "id": 90,
+    "text": "Challenge the troll's honor.",
+    "image": "090.png"
+  },
+  {
+    "id": 91,
+    "text": "Push the suspicious button.",
+    "image": "091.png"
+  },
+  {
+    "id": 92,
+    "text": "Set the goblin banner on fire.",
+    "image": "092.png"
+  },
+  {
+    "id": 93,
+    "text": "Call for divine intervention. Hope someone is listening.",
+    "image": "093.png"
+  },
+  {
+    "id": 94,
+    "text": "Threaten the mimic with splinters.",
+    "image": "094.png"
+  },
+  {
+    "id": 95,
+    "text": "Use the rope swing perfectly.",
+    "image": "095.png"
+  },
+  {
+    "id": 96,
+    "text": "Attemp to slide up the stairs to assert dominance.",
+    "image": "096.png"
+  },
+  {
+    "id": 97,
+    "text": "Try to tackle the dragon's tail with zero backup.",
+    "image": "097.png"
+  },
+  {
+    "id": 98,
+    "text": "Climb onto the war table.",
+    "image": "098.png"
+  },
+  {
+    "id": 99,
+    "text": "Throw a stone and hope it matters.",
+    "image": "099.png"
+  },
+  {
+    "id": 100,
+    "text": "Act like you know what you're doing. You don't.",
+    "image": "100.png"
+  },
+  {
+    "id": 101,
+    "text": "Break the lock with brute force.",
+    "image": "101.png"
+  },
+  {
+    "id": 102,
+    "text": "Demand surrender immediately. From everyone.",
+    "image": "102.png"
+  },
+  {
+    "id": 103,
+    "text": "Put the crown on and demand a tax refund while running.",
+    "image": "103.png"
+  },
+  {
+    "id": 104,
+    "text": "Flip the table for cover.",
+    "image": "104.png"
+  },
+  {
+    "id": 105,
+    "text": "Use the torch to write a warning.",
+    "image": "105.png"
+  },
+  {
+    "id": 106,
+    "text": "Knock the wizard over by accident.",
+    "image": "106.png"
+  },
+  {
+    "id": 107,
+    "text": "Challenge the necromancer to a fistfight.",
+    "image": "107.png"
+  },
+  {
+    "id": 108,
+    "text": "Knock on the crypt and ask if they have a moment to talk about their life insurance.",
+    "image": "108.png"
+  },
+  {
+    "id": 109,
+    "text": "Scatter the ritual candles.",
+    "image": "109.png"
+  },
+  {
+    "id": 110,
+    "text": "Hold your sword up to the lightning and hope for the best.",
+    "image": "110.png"
+  },
+  {
+    "id": 111,
+    "text": "Throw your cloak and vanish poorly.",
+    "image": "111.png"
+  },
+  {
+    "id": 112,
+    "text": "Knock the goblin off the bridge.",
+    "image": "112.png"
+  },
+  {
+    "id": 113,
+    "text": "Rally the villagers with sheer volume.",
+    "image": "113.png"
+  },
+  {
+    "id": 114,
+    "text": "Pull the lever dramatically.",
+    "image": "114.png"
+  },
+  {
+    "id": 115,
+    "text": "Ring the cursed bell anyway.",
+    "image": "115.png"
+  },
+  {
+    "id": 116,
+    "text": "Point at the rogue and nod.",
+    "image": "116.png"
+  },
+  {
+    "id": 117,
+    "text": "Kick the crate into the hallway.",
+    "image": "117.png"
+  },
+  {
+    "id": 118,
+    "text": "Slide the dagger across the table.",
+    "image": "118.png"
+  },
+  {
+    "id": 119,
+    "text": "Break the seal despite warnings.",
+    "image": "119.png"
+  },
+  {
+    "id": 120,
+    "text": "Smash the lockbox.",
+    "image": "120.png"
+  },
+  {
+    "id": 121,
+    "text": "Throw the map into the fire.",
+    "image": "121.png"
+  },
+  {
+    "id": 122,
+    "text": "Drink the potion immediately.",
+    "image": "122.png"
+  },
+  {
+    "id": 123,
+    "text": "Grab the relic and use your teammates as a human shield.",
+    "image": "123.png"
+  },
+  {
+    "id": 124,
+    "text": "Knock the skeleton apart again.",
+    "image": "124.png"
+  },
+  {
+    "id": 125,
+    "text": "Charge down the corridor while making your own boss-fight music.",
+    "image": "125.png"
+  },
+  {
+    "id": 126,
+    "text": "Use the shield to block everything. Including logic.",
+    "image": "126.png"
+  },
+  {
+    "id": 127,
+    "text": "Stare down the beast without blinking.",
+    "image": "127.png"
+  },
+  {
+    "id": 128,
+    "text": "Shove the cultist into the circle.",
+    "image": "128.png"
+  },
+  {
+    "id": 129,
+    "text": "Draw a line in the dirt.",
+    "image": "129.png"
+  },
+  {
+    "id": 130,
+    "text": "Throw the lantern at the ceiling.",
+    "image": "130.png"
+  },
+  {
+    "id": 131,
+    "text": "Grab the banner from the wall.",
+    "image": "131.png"
+  },
+  {
+    "id": 132,
+    "text": "Step onto the altar defiantly.",
+    "image": "132.png"
+  },
+  {
+    "id": 133,
+    "text": "Threaten the goblin accountant.",
+    "image": "133.png"
+  },
+  {
+    "id": 134,
+    "text": "Crash the feast with steel drawn.",
+    "image": "134.png"
+  },
+  {
+    "id": 135,
+    "text": "Kick the trapdoor shut.",
+    "image": "135.png"
+  },
+  {
+    "id": 136,
+    "text": "Wrestle the cursed armor. It wins.",
+    "image": "136.png"
+  },
+  {
+    "id": 137,
+    "text": "Throw the key across the room.",
+    "image": "137.png"
+  },
+  {
+    "id": 138,
+    "text": "Climb the dragon while shouting.",
+    "image": "138.png"
+  },
+  {
+    "id": 139,
+    "text": "Stomp on the scroll.",
+    "image": "139.png"
+  },
+  {
+    "id": 140,
+    "text": "Break into the throne room uninvited.",
+    "image": "140.png"
+  },
+  {
+    "id": 141,
+    "text": "Knock the statue over.",
+    "image": "141.png"
+  },
+  {
+    "id": 142,
+    "text": "Wave the wand around confidently. No idea what it does.",
+    "image": "142.png"
+  },
+  {
+    "id": 143,
+    "text": "Challenge the ager to a rematch.",
+    "image": "143.png"
+  },
+  {
+    "id": 144,
+    "text": "Push the cart downhill.",
+    "image": "144.png"
+  },
+  {
+    "id": 145,
+    "text": "Grab the nearest frying pan.",
+    "image": "145.png"
+  },
+  {
+    "id": 146,
+    "text": "Bluff youn way eae the checkpoint. Badly.",
+    "image": "146.png"
+  },
+  {
+    "id": 147,
+    "text": "Kick the Sets loud as possible.",
+    "image": "147.png"
+  },
+  {
+    "id": 148,
+    "text": "Set your cape billowing on purpose.",
+    "image": "148.png"
+  },
+  {
+    "id": 149,
+    "text": "Trip the ig with a spear shaft.",
+    "image": "149.png"
+  },
+  {
+    "id": 150,
+    "text": "Step into the duel circle first.",
+    "image": "150.png"
+  },
+  {
+    "id": 151,
+    "text": "Snatch the amulet and replace it with a rock that looks like a duck.",
+    "image": "151.png"
+  },
+  {
+    "id": 152,
+    "text": "Smash the enchanted mirror.",
+    "image": "152.png"
+  },
+  {
+    "id": 153,
+    "text": "Open the cage at the worst time.",
+    "image": "153.png"
+  },
+  {
+    "id": 154,
+    "text": "Throw your dagger into the map table.",
+    "image": "154.png"
+  },
+  {
+    "id": 155,
+    "text": "Kick the stool out from under the mage.",
+    "image": "155.png"
+  },
+  {
+    "id": 156,
+    "text": "Point the crossbow at the chandelier rope.",
+    "image": "156.png"
+  },
+  {
+    "id": 157,
+    "text": "Bar the door with your shoulder.",
+    "image": "157.png"
+  },
+  {
+    "id": 158,
+    "text": "Charge the bridge troll head-on.",
+    "image": "158.png"
+  },
+  {
+    "id": 159,
+    "text": "Knock the goblin drummer flat.",
+    "image": "159.png"
+  },
+  {
+    "id": 160,
+    "text": "Grab the wizard's hat and run.",
+    "image": "160.png"
+  },
+  {
+    "id": 161,
+    "text": "Challenge the beast to come closer.",
+    "image": "161.png"
+  },
+  {
+    "id": 162,
+    "text": "Take the bie ground immediately.",
+    "image": "162.png"
+  },
+  {
+    "id": 163,
+    "text": "Crash through the tavern stage.",
+    "image": "163.png"
+  },
+  {
+    "id": 164,
+    "text": "Swing from a rope that should not hold.",
+    "image": "164.png"
+  },
+  {
+    "id": 165,
+    "text": "Threaten the Sep with confidence alone.",
+    "image": "165.png"
+  },
+  {
+    "id": 166,
+    "text": "Kick the cauldron into the fight.",
+    "image": "166.png"
+  },
+  {
+    "id": 167,
+    "text": "Throw the candle stand like a spear.",
+    "image": "167.png"
+  },
+  {
+    "id": 168,
+    "text": "March straight into the haunted hall.",
+    "image": "168.png"
+  },
+  {
+    "id": 169,
+    "text": "Pull the sword from the stone anyway.",
+    "image": "169.png"
+  },
+  {
+    "id": 170,
+    "text": "Crack the bottle over the table edge.",
+    "image": "170.png"
+  },
+  {
+    "id": 171,
+    "text": "Use the tapestry as a net.",
+    "image": "171.png"
+  },
+  {
+    "id": 172,
+    "text": "Leap onto the monster's back.",
+    "image": "172.png"
+  },
+  {
+    "id": 173,
+    "text": "Break the staff over your knee.",
+    "image": "173.png"
+  },
+  {
+    "id": 174,
+    "text": "Shout the wrong spell with conviction.",
+    "image": "174.png"
+  },
+  {
+    "id": 175,
+    "text": "Punch the cursed door.",
+    "image": "175.png"
+  },
+  {
+    "id": 176,
+    "text": "Snap the chain and charge.",
+    "image": "176.png"
+  },
+  {
+    "id": 177,
+    "text": "Use the coin pouch asa distraction.",
+    "image": "177.png"
+  },
+  {
+    "id": 178,
+    "text": "Throw the goblet in the king's face.",
+    "image": "178.png"
+  },
+  {
+    "id": 179,
+    "text": "Grab the relic with both hands.",
+    "image": "179.png"
+  },
+  {
+    "id": 180,
+    "text": "Kick the brazier toward the enemy.",
+    "image": "180.png"
+  },
+  {
+    "id": 181,
+    "text": "Run ee a through the illusion.",
+    "image": "181.png"
+  },
+  {
+    "id": 182,
+    "text": "Accuse the villain of cowardice.",
+    "image": "182.png"
+  },
+  {
+    "id": 183,
+    "text": "Jump from the balcony into chaos.",
+    "image": "183.png"
+  },
+  {
+    "id": 184,
+    "text": "Open negotiations with a headbutt.",
+    "image": "184.png"
+  },
+  {
+    "id": 185,
+    "text": "Enter the throne room doing an aggressive power-walk. Backwards.",
+    "image": "185.png"
+  },
+  {
+    "id": 186,
+    "text": "Cut the rope bridge halfway.",
+    "image": "186.png"
+  },
+  {
+    "id": 187,
+    "text": "Charge the giant's ankles.",
+    "image": "187.png"
+  },
+  {
+    "id": 188,
+    "text": "Flip the ritual table.",
+    "image": "188.png"
+  },
+  {
+    "id": 189,
+    "text": "Knock the crown off the goblin king.",
+    "image": "189.png"
+  },
+  {
+    "id": 190,
+    "text": "Trip on the third step but maintain the momentum.",
+    "image": "190.png"
+  },
+  {
+    "id": 191,
+    "text": "Throw a hammer with alarming accuracy.",
+    "image": "191.png"
+  },
+  {
+    "id": 192,
+    "text": "Kick the chest into the river.",
+    "image": "192.png"
+  },
+  {
+    "id": 193,
+    "text": "Declare the dungeon conquered early.",
+    "image": "193.png"
+  },
+  {
+    "id": 194,
+    "text": "Light the signal fire now. Use the rangers arrows as kindling.",
+    "image": "194.png"
+  },
+  {
+    "id": 195,
+    "text": "Grab the banner and plant it proudly.",
+    "image": "195.png"
+  },
+  {
+    "id": 196,
+    "text": "Point your blade at the heavens.",
+    "image": "196.png"
+  },
+  {
+    "id": 197,
+    "text": "Break the chains and roar.",
+    "image": "197.png"
+  },
+  {
+    "id": 198,
+    "text": "Kick the war drum down the stairs.",
+    "image": "198.png"
+  },
+  {
+    "id": 199,
+    "text": "Crash through the stained glass window.",
+    "image": "199.png"
+  },
+  {
+    "id": 200,
+    "text": "Challenge the darkness itself.",
+    "image": "200.png"
+  },
+  {
+    "id": 201,
+    "text": "Raise your weapon and rush the impossible.",
+    "image": "201.png"
+  }
+]

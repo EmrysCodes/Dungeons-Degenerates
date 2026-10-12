@@ -1,0 +1,507 @@
+[
+  {
+    "id": 0,
+    "text": "A dragon sleeps across the only bridge out of town.",
+    "image": "000.png"
+  },
+  {
+    "id": 1,
+    "text": "A goblin king demands entertainment before letting anyone pass.",
+    "image": "001.png"
+  },
+  {
+    "id": 2,
+    "text": "A cursed sword loudly insults its wielder.",
+    "image": "002.png"
+  },
+  {
+    "id": 3,
+    "text": "A wizard offers power in exchange for an embarrassing favor.",
+    "image": "003.png"
+  },
+  {
+    "id": 4,
+    "text": "A tavern brawl erupts over an insult to a dwarf's beard.",
+    "image": "004.png"
+  },
+  {
+    "id": 5,
+    "text": "A troll demands riddles instead of tolls.",
+    "image": "005.png"
+  },
+  {
+    "id": 6,
+    "text": "A merchant sells suspiciously glowing potions.",
+    "image": "006.png"
+  },
+  {
+    "id": 7,
+    "text": "A dungeon door will only open if someone sings.",
+    "image": "007.png"
+  },
+  {
+    "id": 8,
+    "text": "A giant spider demands rent for its cave.",
+    "image": "008.png"
+  },
+  {
+    "id": 9,
+    "text": "A magical fog forces everyone to speak in rhymes.",
+    "image": "009.png"
+  },
+  {
+    "id": 10,
+    "text": "A knight demands an honorable duel over nothing.",
+    "image": "010.png"
+  },
+  {
+    "id": 11,
+    "text": "A mimic disguises itself as everything in the room.",
+    "image": "011.png"
+  },
+  {
+    "id": 12,
+    "text": "A ghost demands help finishing its unfinished quest.",
+    "image": "012.png"
+  },
+  {
+    "id": 13,
+    "text": "A magical book narrates everything loudly.",
+    "image": "013.png"
+  },
+  {
+    "id": 14,
+    "text": "A dragon hatchling thinks the party are its parents.",
+    "image": "014.png"
+  },
+  {
+    "id": 15,
+    "text": "A ccursed treasure chest refuses to open politely.",
+    "image": "015.png"
+  },
+  {
+    "id": 16,
+    "text": "A wizard tower door asks deeply personal questions.",
+    "image": "016.png"
+  },
+  {
+    "id": 17,
+    "text": "A goblin chef challenges the party to a cooking contest.",
+    "image": "017.png"
+  },
+  {
+    "id": 18,
+    "text": "A skeleton army falls apart mid-battle.",
+    "image": "018.png"
+  },
+  {
+    "id": 19,
+    "text": "A bridge troll demands terrible jokes as payment.",
+    "image": "019.png"
+  },
+  {
+    "id": 20,
+    "text": "A dragon refuses to wake up for the apocalypse.",
+    "image": "020.png"
+  },
+  {
+    "id": 21,
+    "text": "A goblin tax collector emands overdue dungeon fees.",
+    "image": "021.png"
+  },
+  {
+    "id": 22,
+    "text": "A wizard's beard becomes sentient and angry.",
+    "image": "022.png"
+  },
+  {
+    "id": 23,
+    "text": "A cursed goblet forces dramatic speeches.",
+    "image": "023.png"
+  },
+  {
+    "id": 24,
+    "text": "A dungeon hallway keeps changing direction.",
+    "image": "024.png"
+  },
+  {
+    "id": 25,
+    "text": "A necromancer accidentally resurrects a jester.",
+    "image": "025.png"
+  },
+  {
+    "id": 26,
+    "text": "A talking horse claims to be royalty.",
+    "image": "026.png"
+  },
+  {
+    "id": 27,
+    "text": "A giant rat wants a seat on the council.",
+    "image": "027.png"
+  },
+  {
+    "id": 28,
+    "text": "A dragon demands tribute in pies.",
+    "image": "028.png"
+  },
+  {
+    "id": 29,
+    "text": "A magical map leads only to disappointment.",
+    "image": "029.png"
+  },
+  {
+    "id": 30,
+    "text": "A goblin army arrives without a plan.",
+    "image": "030.png"
+  },
+  {
+    "id": 31,
+    "text": "A cursed lantern attracts every monster nearby.",
+    "image": "031.png"
+  },
+  {
+    "id": 32,
+    "text": "A wizard duel becomes an argument about grammar.",
+    "image": "032.png"
+  },
+  {
+    "id": 33,
+    "text": "A skeleton bard begins an emotional ballad.",
+    "image": "033.png"
+  },
+  {
+    "id": 34,
+    "text": "A haunted armor suit asks for fashion advice.",
+    "image": "034.png"
+  },
+  {
+    "id": 35,
+    "text": "A dungeon trap launches harmless chickens.",
+    "image": "035.png"
+  },
+  {
+    "id": 36,
+    "text": "A dragon challenges the party to a staring contest.",
+    "image": "036.png"
+  },
+  {
+    "id": 37,
+    "text": "A troll refuses to fight until lunch is served.",
+    "image": "037.png"
+  },
+  {
+    "id": 38,
+    "text": "A portal opens to somewhere deeply unhelpful.",
+    "image": "038.png"
+  },
+  {
+    "id": 39,
+    "text": "A goblin prophet predicts something embarrassing.",
+    "image": "039.png"
+  },
+  {
+    "id": 40,
+    "text": "Acursed door refuses to stay closed.",
+    "image": "040.png"
+  },
+  {
+    "id": 41,
+    "text": "A wizard accidentally swaps everyone's voices.",
+    "image": "041.png"
+  },
+  {
+    "id": 42,
+    "text": "A dungeon boss insists on a formal introduction.",
+    "image": "042.png"
+  },
+  {
+    "id": 43,
+    "text": "A giant frog demands a toll in flies.",
+    "image": "043.png"
+  },
+  {
+    "id": 44,
+    "text": "A dragon negotiates like a merchant prince.",
+    "image": "044.png"
+  },
+  {
+    "id": 45,
+    "text": "A haunted mirror shows only bad ideas.",
+    "image": "045.png"
+  },
+  {
+    "id": 46,
+    "text": "A goblin shaman blesses the wrong hero.",
+    "image": "046.png"
+  },
+  {
+    "id": 47,
+    "text": "A wandering knight challenges the nearest table.",
+    "image": "047.png"
+  },
+  {
+    "id": 48,
+    "text": "A magical storm rains fish and confusion.",
+    "image": "048.png"
+  },
+  {
+    "id": 49,
+    "text": "A cursed ring refuses to be removed.",
+    "image": "049.png"
+  },
+  {
+    "id": 50,
+    "text": "A necromancer's skeleton union goes on strike.",
+    "image": "050.png"
+  },
+  {
+    "id": 51,
+    "text": "A dragon wants to hear a bedtime story.",
+    "image": "051.png"
+  },
+  {
+    "id": 52,
+    "text": "A wizard's apprentice opens the wrong tome.",
+    "image": "052.png"
+  },
+  {
+    "id": 53,
+    "text": "A goblin war drum starts a village panic.",
+    "image": "053.png"
+  },
+  {
+    "id": 54,
+    "text": "A cursed loaf of bread becomes legendary.",
+    "image": "054.png"
+  },
+  {
+    "id": 55,
+    "text": "A dungeon staircase moves when no one is looking.",
+    "image": "055.png"
+  },
+  {
+    "id": 56,
+    "text": "A bridge appears only when insulted.",
+    "image": "056.png"
+  },
+  {
+    "id": 57,
+    "text": "A dragon hatchery mistakes the party for caretakers.",
+    "image": "057.png"
+  },
+  {
+    "id": 58,
+    "text": "A fant owl demands silence in its woods.",
+    "image": "058.png"
+  },
+  {
+    "id": 59,
+    "text": "A goblin wedding locks the road.",
+    "image": "059.png"
+  },
+  {
+    "id": 60,
+    "text": "A cursed throne makes everyone feel important.",
+    "image": "060.png"
+  },
+  {
+    "id": 61,
+    "text": "A wizard turns a goblin into a legal expert.",
+    "image": "061.png"
+  },
+  {
+    "id": 62,
+    "text": "A tavern cellar opens into ancient ruins.",
+    "image": "062.png"
+  },
+  {
+    "id": 63,
+    "text": "A phost refuses to aunt anyone professionally.",
+    "image": "063.png"
+  },
+  {
+    "id": 64,
+    "text": "A dragon sleeps on the kingdom's tax records.",
+    "image": "064.png"
+  },
+  {
+    "id": 65,
+    "text": "A goblin alchemist sells unstable fireworks.",
+    "image": "065.png"
+  },
+  {
+    "id": 66,
+    "text": "A dungeon riddle makes no sense at all.",
+    "image": "066.png"
+  },
+  {
+    "id": 67,
+    "text": "Acursed helmet grants confidence without competence.",
+    "image": "067.png"
+  },
+  {
+    "id": 68,
+    "text": "A wizard accidentally clones himself again.",
+    "image": "068.png"
+  },
+  {
+    "id": 69,
+    "text": "A dragon challenges the party to arm wrestling.",
+    "image": "069.png"
+  },
+  {
+    "id": 70,
+    "text": "A giant worm ruins a perfectly good road.",
+    "image": "070.png"
+  },
+  {
+    "id": 71,
+    "text": "A goblin king requests a champion.",
+    "image": "071.png"
+  },
+  {
+    "id": 72,
+    "text": "A magical broom starts a rebellion.",
+    "image": "072.png"
+  },
+  {
+    "id": 73,
+    "text": "Acursed crown chooses the least qualified hero.",
+    "image": "073.png"
+  },
+  {
+    "id": 74,
+    "text": "A troll poet demands honest critique.",
+    "image": "074.png"
+  },
+  {
+    "id": 75,
+    "text": "A wizard tower begins walking away.",
+    "image": "075.png"
+  },
+  {
+    "id": 76,
+    "text": "A dragon insists on proper etiquette.",
+    "image": "076.png"
+  },
+  {
+    "id": 77,
+    "text": "A haunted library shushes intruders violently.",
+    "image": "077.png"
+  },
+  {
+    "id": 78,
+    "text": "A goblin market sells terribly cursed cheese.",
+    "image": "078.png"
+  },
+  {
+    "id": 79,
+    "text": "A skeleton guard enforces rules no one knows.",
+    "image": "079.png"
+  },
+  {
+    "id": 80,
+    "text": "A magical well grants oddly specific wishes.",
+    "image": "080.png"
+  },
+  {
+    "id": 81,
+    "text": "A cursed wagon follows the party everywhere.",
+    "image": "081.png"
+  },
+  {
+    "id": 82,
+    "text": "A dragon expects tribute in compliments.",
+    "image": "082.png"
+  },
+  {
+    "id": 83,
+    "text": "A dungeon altar starts whispering legal threats.",
+    "image": "083.png"
+  },
+  {
+    "id": 84,
+    "text": "A giant goat claims ownership of the mountain pass.",
+    "image": "084.png"
+  },
+  {
+    "id": 85,
+    "text": "A goblin choir begins a war chant.",
+    "image": "085.png"
+  },
+  {
+    "id": 86,
+    "text": "A wizard's experiment creates six tiny disasters.",
+    "image": "086.png"
+  },
+  {
+    "id": 87,
+    "text": "A cursed key opens emotionally, not physically.",
+    "image": "087.png"
+  },
+  {
+    "id": 88,
+    "text": "A dragon begins collecting adventurers for conversation.",
+    "image": "088.png"
+  },
+  {
+    "id": 89,
+    "text": "A haunted painting asks too many questions.",
+    "image": "089.png"
+  },
+  {
+    "id": 90,
+    "text": "A magical bell summons the wrong creature.",
+    "image": "090.png"
+  },
+  {
+    "id": 91,
+    "text": "A goblin caravan offers a suspicious alliance.",
+    "image": "091.png"
+  },
+  {
+    "id": 92,
+    "text": "A skeleton knight seeks one final duel.",
+    "image": "092.png"
+  },
+  {
+    "id": 93,
+    "text": "A dragon refuses to fight without witnesses.",
+    "image": "093.png"
+  },
+  {
+    "id": 94,
+    "text": "A cursed tavern menu predicts doom.",
+    "image": "094.png"
+  },
+  {
+    "id": 95,
+    "text": "A wizard loses control of a weather spell.",
+    "image": "095.png"
+  },
+  {
+    "id": 96,
+    "text": "A giant snail blocks the road majestically.",
+    "image": "096.png"
+  },
+  {
+    "id": 97,
+    "text": "A goblin army accidentally besieges itself.",
+    "image": "097.png"
+  },
+  {
+    "id": 98,
+    "text": "A haunted moat tries to negotiate passage.",
+    "image": "098.png"
+  },
+  {
+    "id": 99,
+    "text": "A dragon demands proof of heroism.",
+    "image": "099.png"
+  },
+  {
+    "id": 100,
+    "text": "A wizard opens a portal to utter nonsense.",
+    "image": "100.png"
+  }
+]
