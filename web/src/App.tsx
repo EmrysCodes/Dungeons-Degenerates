@@ -3,17 +3,24 @@ import { TitleScreen } from './components/TitleScreen'
 import { GameTable } from './components/GameTable'
 import { VictoryScreen } from './components/VictoryScreen'
 import { HowToPlay } from './components/HowToPlay'
+import { ShopPanel } from './components/ShopPanel'
 import {
-  advanceAfterRound,
   aiJudgePick,
+  armRecklessDraw,
+  armSwitcheroo,
   autoPlayNonJudges,
+  buyShopItem,
   createInitialState,
+  enterShop,
+  judgePickBySlot,
+  leaveShop,
   playPlayerCard,
   revealNext,
   startMatch,
-  judgePickBySlot,
+  usePlayerItem,
 } from './game/engine'
 import type { GameState } from './game/types'
+import type { ItemId } from './data/items'
 import { playFlip, playJudge, playTap, playWin, unlockAudio } from './audio/sfx'
 
 function useTimeout(callback: () => void, delay: number | null) {
@@ -44,7 +51,6 @@ export default function App() {
   }
   const toTitle = () => setState(createInitialState())
 
-  // SFX on phase / reveal transitions
   useEffect(() => {
     if (state.phase === 'revealing' && state.revealIndex !== prevReveal.current) {
       playFlip()
@@ -53,45 +59,44 @@ export default function App() {
       playJudge()
     }
     if (
-      (state.phase === 'roundResult' || state.phase === 'victory') &&
+      (state.phase === 'roundResult' || state.phase === 'victory' || state.phase === 'shop') &&
       prevPhase.current !== state.phase
     ) {
-      playWin()
+      if (state.phase !== 'shop') playWin()
     }
     prevPhase.current = state.phase
     prevReveal.current = state.revealIndex
   }, [state.phase, state.revealIndex])
 
-  // When player is judge: AI auto-submit after short delay
   useTimeout(
     () => setState((s) => autoPlayNonJudges(s)),
     state.phase === 'waiting' && state.judgeId === 'you' ? 900 : null,
   )
 
-  // After player plays: AI finish submitting (staggered window ~ like GDD 5s)
   useTimeout(
     () => setState((s) => autoPlayNonJudges(s)),
-    state.phase === 'waiting' && state.judgeId !== 'you' && state.submissions.some((s) => s.ownerId === 'you')
+    state.phase === 'waiting' &&
+      state.judgeId !== 'you' &&
+      state.submissions.some((s) => s.ownerId === 'you')
       ? 800 + Math.random() * 1800
       : null,
   )
 
-  // Reveal cadence — readable pause between flips (GDD used 5s; web uses ~3s)
   useTimeout(
     () => setState((s) => revealNext(s)),
     state.phase === 'revealing' ? (state.revealIndex === 0 ? 700 : 3000) : null,
   )
 
-  // AI judge
+  // AI judge only — human MUST click (no auto-pick)
   useTimeout(
     () => setState((s) => aiJudgePick(s)),
     state.phase === 'judging' && state.judgeId !== 'you' ? 1800 : null,
   )
 
-  // Advance after round result
+  // After round result, open shop (human chooses purchases)
   useTimeout(
-    () => setState((s) => advanceAfterRound(s)),
-    state.phase === 'roundResult' ? 2600 : null,
+    () => setState((s) => enterShop(s)),
+    state.phase === 'roundResult' ? 2200 : null,
   )
 
   const onPlayCard = (index: number) => {
@@ -120,7 +125,17 @@ export default function App() {
         onJudgeSlot={onJudgeSlot}
         onRestart={restart}
         onHowTo={() => setHowto(true)}
+        onReckless={() => setState((s) => armRecklessDraw(s))}
+        onSwitcheroo={() => setState((s) => armSwitcheroo(s))}
+        onUseItem={(uid) => setState((s) => usePlayerItem(s, uid))}
       />
+      {state.phase === 'shop' && (
+        <ShopPanel
+          state={state}
+          onBuy={(itemId: ItemId) => setState((s) => buyShopItem(s, itemId))}
+          onLeave={() => setState((s) => leaveShop(s))}
+        />
+      )}
       <HowToPlay open={howto} onClose={() => setHowto(false)} />
     </>
   )

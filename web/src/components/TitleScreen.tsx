@@ -20,8 +20,8 @@ export function TitleScreen({ onStart }: Props) {
           <span>Degenerates</span>
         </h1>
         <p className="title-tagline">
-          Absurd fantasy scenarios. Ridiculous action cards. One rotating judge.
-          Submissions stay anonymous. First to five Loot Tokens owns the tavern.
+          Absurd scenarios, anonymous submissions, mechanical role perks, gold &amp; items.
+          First to five Loot Tokens owns the tavern.
         </p>
         <div className="title-cta">
           <button
@@ -38,7 +38,7 @@ export function TitleScreen({ onStart }: Props) {
             How to Play
           </button>
         </div>
-        <p className="title-meta">Local vs 2 AI · Roles · Rotating Judge · Anonymous reveals</p>
+        <p className="title-meta">Local vs 2 AI · Perks · Gold &amp; Items · Anonymous Judge</p>
       </div>
       <div className="title-fan" aria-hidden="true">
         <img src="/cards/scenario/000.png" alt="" className="fan-card fan-1" />

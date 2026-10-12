@@ -428,6 +428,230 @@ body::after {
   font-style: italic;
 }
 
+.howto-wide {
+  width: min(520px, 100%);
+  max-height: min(90vh, 720px);
+  overflow: auto;
+}
+
+.howto-sub {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-size: 1.35rem;
+}
+
+.gold-chip {
+  font-weight: 600;
+  color: var(--gold);
+  font-size: 0.78rem;
+}
+
+.judge-pill.judge-active {
+  border-color: rgba(224, 138, 60, 0.7);
+  background: rgba(224, 138, 60, 0.18);
+  color: var(--parchment);
+}
+
+.judge-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  background: rgba(224, 138, 60, 0.16);
+  border: 1px solid rgba(224, 138, 60, 0.45);
+  animation: pulse-glow 1.8s ease infinite;
+}
+
+.judge-banner strong {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  font-size: 1.25rem;
+  color: var(--ember);
+}
+
+.judge-banner span {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.play-area.judging-mode {
+  padding: 0.75rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(224, 138, 60, 0.06);
+  border: 1px dashed rgba(224, 138, 60, 0.28);
+}
+
+.played-slot.pickable {
+  gap: 0.45rem;
+}
+
+.pick-winner-btn {
+  width: 100%;
+  max-width: 128px;
+}
+
+.perk-effect {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+}
+
+.perk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.perk-armed {
+  font-size: 0.8rem;
+  color: var(--ember);
+}
+
+.inventory-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+}
+
+.inventory-row.center {
+  justify-content: center;
+}
+
+.inv-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 181, 106, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.72rem;
+  color: var(--parchment);
+  text-align: left;
+}
+
+.inv-chip strong {
+  font-size: 0.8rem;
+}
+
+.inv-chip span {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.62rem;
+}
+
+.inv-chip.passive {
+  opacity: 0.9;
+  cursor: default;
+}
+
+.inv-chip:not(.passive):hover {
+  border-color: var(--ember);
+  background: rgba(224, 138, 60, 0.12);
+}
+
+.hand.dimmed-hand {
+  opacity: 0.55;
+}
+
+.judge-hint strong {
+  color: var(--ember);
+}
+
+.shop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 4, 3, 0.78);
+  backdrop-filter: blur(5px);
+}
+
+.shop-panel {
+  width: min(640px, 100%);
+  max-height: min(92vh, 800px);
+  overflow: auto;
+  background: linear-gradient(165deg, rgba(42, 34, 26, 0.98), rgba(12, 10, 8, 0.96));
+  border: 1px solid rgba(212, 181, 106, 0.3);
+  border-radius: 12px;
+  padding: 1.4rem 1.25rem;
+  box-shadow: var(--shadow-deep);
+  text-align: center;
+}
+
+.shop-panel h2 {
+  margin: 0.25rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  letter-spacing: 0.04em;
+}
+
+.shop-gold {
+  margin: 0 0 0.75rem;
+  color: var(--text-dim);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+  text-align: left;
+}
+
+.shop-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.7rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(217, 203, 180, 0.12);
+}
+
+.shop-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.shop-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.shop-price {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.shop-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.victory-items {
+  margin-bottom: 1rem;
+}
+
+.loot-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
 .round-pill,
 .judge-pill {
   display: inline-flex;

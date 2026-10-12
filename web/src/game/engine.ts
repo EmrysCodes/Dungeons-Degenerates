@@ -2,11 +2,21 @@ import actions from '../data/actions.json'
 import scenarios from '../data/scenarios.json'
 import { ROLES, type Role } from '../data/roles'
 import {
+  ITEM_CATALOG,
+  LOOT_DROP_POOL,
+  MATCH_WIN_BONUS_GOLD,
+  ROUND_WIN_GOLD,
+  STARTING_GOLD,
+  getItem,
+  type ItemId,
+} from '../data/items'
+import {
   HAND_SIZE,
   LOOT_TO_WIN,
   PLAYER_ORDER,
   type CardData,
   type GameState,
+  type OwnedItem,
   type Phase,
   type PlayerId,
   type PlayerState,
@@ -24,6 +34,12 @@ function shuffle<T>(items: T[]): T[] {
 
 function cloneCards(cards: CardData[]): CardData[] {
   return cards.map((c) => ({ ...c }))
+}
+
+let uidCounter = 0
+function nextUid(): string {
+  uidCounter += 1
+  return `item_${uidCounter}_${Math.floor(Math.random() * 1e6)}`
 }
 
 function drawOne(
@@ -65,11 +81,7 @@ function drawMany(
 
 function assignRoles(): Record<PlayerId, Role> {
   const roles = shuffle(ROLES)
-  return {
-    you: roles[0],
-    ai1: roles[1],
-    ai2: roles[2],
-  }
+  return { you: roles[0], ai1: roles[1], ai2: roles[2] }
 }
 
 function nextJudge(current: PlayerId): PlayerId {
@@ -88,7 +100,21 @@ function emptyPlayer(id: PlayerId, name: string): PlayerState {
     role: ROLES[0],
     hand: [],
     loot: 0,
+    gold: STARTING_GOLD,
+    items: [],
+    perkUsedThisRound: false,
+    tipJudgeActive: false,
+    insuranceArmed: false,
   }
+}
+
+function makeShopOffers(): ItemId[] {
+  return shuffle(ITEM_CATALOG.map((i) => i.id)).slice(0, 4)
+}
+
+function grantItem(player: PlayerState, itemId: ItemId): PlayerState {
+  const owned: OwnedItem = { uid: nextUid(), itemId, used: false }
+  return { ...player, items: [...player.items, owned] }
 }
 
 export function createInitialState(): GameState {
@@ -110,18 +136,22 @@ export function createInitialState(): GameState {
     revealIndex: 0,
     lastWinner: null,
     lastWinningSlotId: null,
+    lastRewardText: '',
+    shopOffers: [],
     statusText: '',
+    switcherooArmed: false,
+    recklessDiscardPending: false,
   }
 }
 
 export function startMatch(): GameState {
+  uidCounter = 0
   const roles = assignRoles()
   const actionMaster = cloneCards(actions as CardData[])
   const scenarioMaster = cloneCards(scenarios as CardData[])
   let actionPile = shuffle(actionMaster)
   let scenarioPile = shuffle(scenarioMaster)
   const actionDiscard: CardData[] = []
-  const scenarioDiscard: CardData[] = []
 
   const names: Record<PlayerId, string> = {
     you: 'You',
@@ -139,30 +169,26 @@ export function startMatch(): GameState {
       role: roles[id],
       hand: drawn.cards,
       loot: 0,
+      gold: STARTING_GOLD,
+      items: [],
+      perkUsedThisRound: false,
+      tipJudgeActive: false,
+      insuranceArmed: false,
     }
   }
 
-  const base: GameState = {
+  return beginRound({
+    ...createInitialState(),
     phase: 'dealing',
-    round: 0,
-    scenario: null,
     players,
-    judgeId: 'you',
     actionPile,
     actionDiscard,
     scenarioPile,
-    scenarioDiscard,
-    submissions: [],
-    revealIndex: 0,
-    lastWinner: null,
-    lastWinningSlotId: null,
+    scenarioDiscard: [],
     statusText: 'Dealing chaos…',
-  }
-
-  return beginRound(base)
+  })
 }
 
-/** Pending plays staged by owner before anonymous slot assignment. */
 type PendingPlays = Partial<Record<PlayerId, CardData>>
 
 function getPending(state: GameState): PendingPlays {
@@ -174,7 +200,6 @@ function getPending(state: GameState): PendingPlays {
 }
 
 function setPending(state: GameState, pending: PendingPlays): GameState {
-  // Keep face-down anonymous placeholders only for submitted cards, shuffled
   const owners = Object.keys(pending) as PlayerId[]
   const submissions: SubmissionSlot[] = shuffle(owners).map((ownerId, i) => ({
     slotId: `slot_${i}`,
@@ -197,6 +222,23 @@ export function beginRound(state: GameState): GameState {
   const judgeName = state.players[judgeId].name
   const isPlayerJudge = judgeId === 'you'
 
+  const players = { ...state.players }
+  for (const id of PLAYER_ORDER) {
+    const p = players[id]
+    let gold = p.gold
+    // Gilded Goblet passive
+    if (p.items.some((i) => i.itemId === 'gilded_goblet' && !i.used)) {
+      gold += 1
+    }
+    players[id] = {
+      ...p,
+      gold,
+      perkUsedThisRound: false,
+      tipJudgeActive: false,
+      insuranceArmed: false,
+    }
+  }
+
   return {
     ...state,
     phase: isPlayerJudge ? 'waiting' : 'selecting',
@@ -208,7 +250,11 @@ export function beginRound(state: GameState): GameState {
     revealIndex: 0,
     lastWinner: null,
     lastWinningSlotId: null,
+    lastRewardText: '',
     judgeId,
+    players,
+    switcherooArmed: false,
+    recklessDiscardPending: false,
     statusText: isPlayerJudge
       ? 'You are the Judge. Waiting for anonymous submissions…'
       : `${judgeName} is judging. Play your most unhinged Action.`,
@@ -219,21 +265,46 @@ export function autoPlayNonJudges(state: GameState): GameState {
   if (state.phase !== 'waiting' && state.phase !== 'selecting') return state
 
   const pending = getPending(state)
-  const players = { ...state.players }
+  let players = { ...state.players }
+  let actionPile = state.actionPile
+  let actionDiscard = state.actionDiscard
+  const master = actions as CardData[]
 
   for (const id of participants(state.judgeId)) {
     if (id === 'you') continue
     if (pending[id]) continue
-    const hand = [...players[id].hand]
-    if (hand.length === 0) continue
-    // Prefer keyword-ish picks vs random for a bit of flavor
+
+    // AI may use Reckless Draw (barbarian) before playing
+    let p = players[id]
+    if (p.role.id === 'barbarian' && !p.perkUsedThisRound && p.hand.length >= 2 && Math.random() < 0.45) {
+      const discardIdx = Math.floor(Math.random() * p.hand.length)
+      const hand = [...p.hand]
+      const [trashed] = hand.splice(discardIdx, 1)
+      actionDiscard = [...actionDiscard, trashed]
+      const drawn = drawMany(actionPile, actionDiscard, master, 2)
+      actionPile = drawn.pile
+      actionDiscard = drawn.discard
+      p = { ...p, hand: [...hand, ...drawn.cards], perkUsedThisRound: true }
+    }
+
+    const hand = [...p.hand]
+    if (hand.length === 0) {
+      players[id] = p
+      continue
+    }
     const pick = pickAiActionIndex(hand, state.scenario)
     const [card] = hand.splice(pick, 1)
-    players[id] = { ...players[id], hand }
+    players[id] = { ...p, hand }
     pending[id] = card
+
+    // AI tip the judge sometimes
+    if (players[id].items.some((i) => i.itemId === 'tip_the_judge' && !i.used) && Math.random() < 0.2) {
+      players[id] = useConsumableOnPlayer(players[id], 'tip_the_judge')
+      players[id] = { ...players[id], tipJudgeActive: true }
+    }
   }
 
-  let next = setPending({ ...state, players }, pending)
+  let next = setPending({ ...state, players, actionPile, actionDiscard }, pending)
   const allIn = participants(state.judgeId).every((id) => Boolean(pending[id]))
   if (!allIn) {
     return {
@@ -243,10 +314,41 @@ export function autoPlayNonJudges(state: GameState): GameState {
     }
   }
 
+  // AI rogue switcheroo chance before reveal
+  next = maybeAiSwitcheroo(next)
+
   return startReveal(next)
 }
 
+function maybeAiSwitcheroo(state: GameState): GameState {
+  let players = { ...state.players }
+  const pending = getPending(state)
+  let changed = false
+  for (const id of participants(state.judgeId)) {
+    if (id === 'you') continue
+    const p = players[id]
+    if (p.role.id !== 'rogue' || p.perkUsedThisRound || !pending[id]) continue
+    if (p.hand.length === 0 || Math.random() > 0.4) continue
+    const hand = [...p.hand]
+    const swapIdx = Math.floor(Math.random() * hand.length)
+    const old = pending[id]!
+    const [neu] = hand.splice(swapIdx, 1)
+    hand.push(old)
+    pending[id] = neu
+    players[id] = { ...p, hand, perkUsedThisRound: true }
+    changed = true
+  }
+  if (!changed) return state
+  return setPending({ ...state, players }, pending)
+}
+
 export function playPlayerCard(state: GameState, handIndex: number): GameState {
+  if (state.recklessDiscardPending) {
+    return confirmRecklessDiscard(state, handIndex)
+  }
+  if (state.switcherooArmed) {
+    return confirmSwitcheroo(state, handIndex)
+  }
   if (state.phase !== 'selecting') return state
   if (state.judgeId === 'you') return state
 
@@ -258,15 +360,10 @@ export function playPlayerCard(state: GameState, handIndex: number): GameState {
   const pending = getPending(state)
   pending.you = card
 
-  const players = {
-    ...state.players,
-    you: { ...you, hand },
-  }
-
   return setPending(
     {
       ...state,
-      players,
+      players: { ...state.players, you: { ...you, hand } },
       phase: 'waiting',
       statusText: 'Card locked face-down. Waiting for the table…',
     },
@@ -274,8 +371,88 @@ export function playPlayerCard(state: GameState, handIndex: number): GameState {
   )
 }
 
+/** Barbarian: arm reckless draw — next hand click discards that card, then draw 2 */
+export function armRecklessDraw(state: GameState): GameState {
+  const you = state.players.you
+  if (you.role.id !== 'barbarian') return state
+  if (you.perkUsedThisRound) return state
+  if (state.judgeId === 'you') return state
+  if (you.hand.length < 1) return state
+  if (state.phase !== 'selecting' && state.phase !== 'waiting') return state
+  return {
+    ...state,
+    recklessDiscardPending: true,
+    switcherooArmed: false,
+    statusText: 'Reckless Draw: tap a card in hand to discard it, then draw 2.',
+  }
+}
+
+function confirmRecklessDiscard(state: GameState, handIndex: number): GameState {
+  const you = state.players.you
+  if (handIndex < 0 || handIndex >= you.hand.length) return state
+  const hand = [...you.hand]
+  const [trashed] = hand.splice(handIndex, 1)
+  let actionDiscard = [...state.actionDiscard, trashed]
+  const drawn = drawMany(state.actionPile, actionDiscard, actions as CardData[], 2)
+  return {
+    ...state,
+    actionPile: drawn.pile,
+    actionDiscard: drawn.discard,
+    recklessDiscardPending: false,
+    players: {
+      ...state.players,
+      you: {
+        ...you,
+        hand: [...hand, ...drawn.cards],
+        perkUsedThisRound: true,
+      },
+    },
+    statusText: 'Reckless Draw spent. Bigger bad decisions acquired.',
+  }
+}
+
+/** Rogue: arm switcheroo after submitting */
+export function armSwitcheroo(state: GameState): GameState {
+  const you = state.players.you
+  if (you.role.id !== 'rogue') return state
+  if (you.perkUsedThisRound) return state
+  if (state.judgeId === 'you') return state
+  const pending = getPending(state)
+  if (!pending.you) return state
+  if (state.phase !== 'waiting') return state
+  if (you.hand.length < 1) return state
+  return {
+    ...state,
+    switcherooArmed: true,
+    recklessDiscardPending: false,
+    statusText: 'Switcheroo: tap a hand card to swap with your face-down submission.',
+  }
+}
+
+function confirmSwitcheroo(state: GameState, handIndex: number): GameState {
+  const you = state.players.you
+  if (handIndex < 0 || handIndex >= you.hand.length) return state
+  const pending = getPending(state)
+  if (!pending.you) return state
+  const hand = [...you.hand]
+  const [neu] = hand.splice(handIndex, 1)
+  hand.push(pending.you)
+  pending.you = neu
+  return setPending(
+    {
+      ...state,
+      switcherooArmed: false,
+      players: {
+        ...state.players,
+        you: { ...you, hand, perkUsedThisRound: true },
+      },
+      statusText: 'Switcheroo done. Totally part of the plan.',
+    },
+    pending,
+  )
+}
+
 function startReveal(state: GameState): GameState {
-  // Re-shuffle slot order at reveal start so submit order ≠ reveal order
   const reshuffled = shuffle(state.submissions).map((s, i) => ({
     ...s,
     slotId: `slot_${i}`,
@@ -286,6 +463,8 @@ function startReveal(state: GameState): GameState {
     phase: 'revealing',
     submissions: reshuffled,
     revealIndex: 0,
+    switcherooArmed: false,
+    recklessDiscardPending: false,
     statusText: 'Revealing a card…',
   }
 }
@@ -303,11 +482,7 @@ export function revealNext(state: GameState): GameState {
   const done = nextIndex >= submissions.length
 
   if (done) {
-    return enterJudging({
-      ...state,
-      submissions,
-      revealIndex: nextIndex,
-    })
+    return enterJudging({ ...state, submissions, revealIndex: nextIndex })
   }
 
   return {
@@ -325,55 +500,19 @@ function enterJudging(state: GameState): GameState {
     phase: 'judging',
     statusText:
       state.judgeId === 'you'
-        ? 'Judge the chaos. Pick the winning Action — identities stay hidden.'
+        ? 'YOUR CALL — tap Option A or B to crown the winner. Identities stay hidden.'
         : `${judge.name} is judging in secret…`,
   }
 }
 
 export function judgePickBySlot(state: GameState, slotId: string): GameState {
   if (state.phase !== 'judging') return state
+  if (state.judgeId !== 'you') return state
   const slot = state.submissions.find((s) => s.slotId === slotId)
   if (!slot || !slot.revealed) return state
-  if (slot.ownerId === state.judgeId) return state
   return finalizeWinner(state, slot.ownerId, slot.slotId)
 }
 
-export function judgePick(state: GameState, winnerId: PlayerId): GameState {
-  if (state.phase !== 'judging') return state
-  if (winnerId === state.judgeId) return state
-  const slot = state.submissions.find((s) => s.ownerId === winnerId && s.revealed)
-  if (!slot) return state
-  return finalizeWinner(state, winnerId, slot.slotId)
-}
-
-function finalizeWinner(state: GameState, winnerId: PlayerId, slotId: string): GameState {
-  const players = { ...state.players }
-  players[winnerId] = {
-    ...players[winnerId],
-    loot: players[winnerId].loot + 1,
-  }
-
-  // Discard played actions
-  const playedCards = state.submissions.map((s) => s.card)
-  const actionDiscard = [...state.actionDiscard, ...playedCards]
-
-  const winner = players[winnerId]
-  const victory = winner.loot >= LOOT_TO_WIN
-
-  return {
-    ...state,
-    players,
-    actionDiscard,
-    lastWinner: winnerId,
-    lastWinningSlotId: slotId,
-    phase: victory ? 'victory' : 'roundResult',
-    statusText: victory
-      ? `${winner.name} wins the match with ${winner.loot} Loot Tokens!`
-      : `${winner.name} takes the Loot Token!`,
-  }
-}
-
-/** Keyword-flavored AI judge — still chaotic, slightly thematic. */
 export function aiJudgePick(state: GameState): GameState {
   if (state.phase !== 'judging' || state.judgeId === 'you') return state
   const options = state.submissions.filter((s) => s.revealed)
@@ -387,14 +526,242 @@ export function aiJudgePick(state: GameState): GameState {
     for (const k of keywords) {
       if (text.includes(k)) score += 1.5
     }
-    // Humor bias keywords
     for (const funny of ['seduce', 'chair', 'blame', 'drink', 'fake', 'curse', 'scream', 'gold']) {
       if (text.includes(funny)) score += 0.4
     }
+    if (state.players[s.ownerId].tipJudgeActive) score += 3.5
     return { slot: s, score }
   })
   scored.sort((a, b) => b.score - a.score)
   return finalizeWinner(state, scored[0].slot.ownerId, scored[0].slot.slotId)
+}
+
+function finalizeWinner(state: GameState, winnerId: PlayerId, slotId: string): GameState {
+  let players = { ...state.players }
+  const winner = players[winnerId]
+  let goldGain = ROUND_WIN_GOLD
+  const rewardBits: string[] = [`+${ROUND_WIN_GOLD}g`, '+1 Loot Token']
+
+  // Heirloom Dagger passive
+  if (winner.items.some((i) => i.itemId === 'heirloom_dagger' && !i.used)) {
+    goldGain += 1
+    rewardBits.push('+1g dagger')
+  }
+  // Bard Crowd Favorite
+  let actionPile = state.actionPile
+  let actionDiscard = state.actionDiscard
+  if (winner.role.id === 'bard') {
+    goldGain += 2
+    rewardBits.push('+2g bard encore')
+    const drawn = drawMany(actionPile, actionDiscard, actions as CardData[], 1)
+    actionPile = drawn.pile
+    actionDiscard = drawn.discard
+    players[winnerId] = {
+      ...winner,
+      hand: [...winner.hand, ...drawn.cards],
+    }
+  }
+
+  // Loot item drop
+  const dropId = LOOT_DROP_POOL[Math.floor(Math.random() * LOOT_DROP_POOL.length)]
+  const drop = getItem(dropId)
+  players[winnerId] = grantItem(
+    {
+      ...players[winnerId],
+      loot: players[winnerId].loot + 1,
+      gold: players[winnerId].gold + goldGain,
+    },
+    dropId,
+  )
+  rewardBits.push(`item: ${drop.name}`)
+
+  // Insurance for losers
+  for (const id of participants(state.judgeId)) {
+    if (id === winnerId) continue
+    const p = players[id]
+    if (p.insuranceArmed) {
+      players[id] = { ...p, gold: p.gold + 3, insuranceArmed: false }
+    }
+  }
+
+  const playedCards = state.submissions.map((s) => s.card)
+  actionDiscard = [...actionDiscard, ...playedCards]
+
+  const victory = players[winnerId].loot >= LOOT_TO_WIN
+  if (victory) {
+    players[winnerId] = {
+      ...players[winnerId],
+      gold: players[winnerId].gold + MATCH_WIN_BONUS_GOLD,
+    }
+    rewardBits.push(`+${MATCH_WIN_BONUS_GOLD}g match bonus`)
+  }
+
+  const rewardText = `${players[winnerId].name} wins — ${rewardBits.join(' · ')}`
+
+  return {
+    ...state,
+    players,
+    actionPile,
+    actionDiscard,
+    lastWinner: winnerId,
+    lastWinningSlotId: slotId,
+    lastRewardText: rewardText,
+    phase: victory ? 'victory' : 'roundResult',
+    statusText: victory
+      ? `${players[winnerId].name} wins the match! ${rewardText}`
+      : rewardText,
+  }
+}
+
+export function enterShop(state: GameState): GameState {
+  if (state.phase !== 'roundResult') return state
+  // AI impulse-buys something affordable
+  let players = { ...state.players }
+  const offers = makeShopOffers()
+  for (const id of ['ai1', 'ai2'] as PlayerId[]) {
+    const p = players[id]
+    const affordable = offers
+      .map(getItem)
+      .filter((item) => item.cost <= p.gold)
+      .sort((a, b) => b.cost - a.cost)
+    if (affordable.length && Math.random() < 0.55) {
+      const buy = affordable[0]
+      players[id] = grantItem({ ...p, gold: p.gold - buy.cost }, buy.id)
+    }
+  }
+  return {
+    ...state,
+    phase: 'shop',
+    players,
+    shopOffers: offers,
+    statusText: 'Tavern shop is open. Spend gold on dubious gear, or skip.',
+  }
+}
+
+export function buyShopItem(state: GameState, itemId: ItemId): GameState {
+  if (state.phase !== 'shop') return state
+  if (!state.shopOffers.includes(itemId)) return state
+  const def = getItem(itemId)
+  const you = state.players.you
+  if (you.gold < def.cost) return state
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      you: grantItem({ ...you, gold: you.gold - def.cost }, itemId),
+    },
+    shopOffers: state.shopOffers.filter((id) => id !== itemId),
+    statusText: `Bought ${def.name}. What could go wrong?`,
+  }
+}
+
+export function leaveShop(state: GameState): GameState {
+  if (state.phase !== 'shop') return state
+  return advanceAfterRound({ ...state, phase: 'roundResult' })
+}
+
+export function advanceAfterRound(state: GameState): GameState {
+  if (state.phase !== 'roundResult') return state
+
+  const actionMaster = actions as CardData[]
+  let actionPile = state.actionPile
+  let actionDiscard = state.actionDiscard
+  const players = { ...state.players }
+
+  for (const id of PLAYER_ORDER) {
+    const p = players[id]
+    const need = HAND_SIZE - p.hand.length
+    if (need > 0) {
+      const drawn = drawMany(actionPile, actionDiscard, actionMaster, need)
+      actionPile = drawn.pile
+      actionDiscard = drawn.discard
+      players[id] = { ...p, hand: [...p.hand, ...drawn.cards] }
+    }
+  }
+
+  return beginRound({
+    ...state,
+    players,
+    actionPile,
+    actionDiscard,
+    submissions: [],
+  })
+}
+
+function useConsumableOnPlayer(player: PlayerState, itemId: ItemId): PlayerState {
+  const idx = player.items.findIndex((i) => i.itemId === itemId && !i.used)
+  if (idx < 0) return player
+  const items = player.items.map((it, i) =>
+    i === idx ? { ...it, used: true } : it,
+  )
+  // Remove used consumables from inventory display
+  return { ...player, items: items.filter((i) => !i.used || getItem(i.itemId).kind === 'passive') }
+}
+
+export function usePlayerItem(state: GameState, uid: string): GameState {
+  const you = state.players.you
+  const owned = you.items.find((i) => i.uid === uid && !i.used)
+  if (!owned) return state
+  const def = getItem(owned.itemId)
+  if (def.kind === 'passive') return state
+
+  let next: GameState = { ...state }
+  let player = { ...you }
+
+  switch (owned.itemId) {
+    case 'tavern_tab': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actions as CardData[], 2)
+      next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
+      player = { ...player, hand: [...player.hand, ...drawn.cards] }
+      next.statusText = 'Tavern Tab: +2 Actions. The bartender looks concerned.'
+      break
+    }
+    case 'second_thought': {
+      const pending = getPending(state)
+      if (!pending.you || (state.phase !== 'waiting' && state.phase !== 'selecting')) {
+        return { ...state, statusText: 'Second Thought only works with a face-down submission.' }
+      }
+      const hand = [...player.hand, pending.you]
+      delete pending.you
+      player = { ...player, hand }
+      next = setPending(
+        { ...next, phase: 'selecting', statusText: 'Second Thought: play a different Action.' },
+        pending,
+      )
+      break
+    }
+    case 'tip_the_judge': {
+      player = { ...player, tipJudgeActive: true }
+      next.statusText = 'Tip the Judge slipped under the table.'
+      break
+    }
+    case 'insurance': {
+      player = { ...player, insuranceArmed: true }
+      next.statusText = 'Insurance armed. Losing still pays… a little.'
+      break
+    }
+    case 'lucky_coin': {
+      let actionDiscard = [...state.actionDiscard, ...player.hand]
+      const drawn = drawMany(state.actionPile, actionDiscard, actions as CardData[], HAND_SIZE)
+      next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
+      player = { ...player, hand: drawn.cards }
+      next.statusText = 'Lucky Coin flip — new hand of chaos.'
+      break
+    }
+    case 'smoke_bomb': {
+      player = { ...player, gold: player.gold + 2 }
+      next.statusText = 'Smoke Bomb sold to a goblin for 2g. Textbook degeneracy.'
+      break
+    }
+    default:
+      return state
+  }
+
+  player = useConsumableOnPlayer(player, owned.itemId)
+  return {
+    ...next,
+    players: { ...next.players, you: player },
+  }
 }
 
 function pickAiActionIndex(hand: CardData[], scenario: CardData | null): number {
@@ -417,41 +784,12 @@ function pickAiActionIndex(hand: CardData[], scenario: CardData | null): number 
   return best
 }
 
-export function advanceAfterRound(state: GameState): GameState {
-  if (state.phase !== 'roundResult') return state
-
-  const actionMaster = actions as CardData[]
-  let actionPile = state.actionPile
-  let actionDiscard = state.actionDiscard
-  const players = { ...state.players }
-
-  // Contenders already discarded their played cards in finalizeWinner.
-  // Refill everyone who is short (judge didn't play, so only needs top-up if somehow short).
-  for (const id of PLAYER_ORDER) {
-    const p = players[id]
-    const need = HAND_SIZE - p.hand.length
-    if (need > 0) {
-      const drawn = drawMany(actionPile, actionDiscard, actionMaster, need)
-      actionPile = drawn.pile
-      actionDiscard = drawn.discard
-      players[id] = { ...p, hand: [...p.hand, ...drawn.cards] }
-    }
-  }
-
-  return beginRound({
-    ...state,
-    players,
-    actionPile,
-    actionDiscard,
-    submissions: [],
-  })
-}
-
 export function setPhase(state: GameState, phase: Phase, statusText?: string): GameState {
   return { ...state, phase, statusText: statusText ?? state.statusText }
 }
 
 export function isPlayable(state: GameState): boolean {
+  if (state.recklessDiscardPending || state.switcherooArmed) return true
   return state.phase === 'selecting' && state.judgeId !== 'you'
 }
 
@@ -465,4 +803,29 @@ export function submittedCount(state: GameState): number {
 
 export function expectedSubmitters(state: GameState): number {
   return participants(state.judgeId).length
+}
+
+export function canUseReckless(state: GameState): boolean {
+  const you = state.players.you
+  return (
+    you.role.id === 'barbarian' &&
+    !you.perkUsedThisRound &&
+    state.judgeId !== 'you' &&
+    you.hand.length > 0 &&
+    (state.phase === 'selecting' || state.phase === 'waiting') &&
+    !state.recklessDiscardPending
+  )
+}
+
+export function canUseSwitcheroo(state: GameState): boolean {
+  const you = state.players.you
+  return (
+    you.role.id === 'rogue' &&
+    !you.perkUsedThisRound &&
+    state.judgeId !== 'you' &&
+    state.phase === 'waiting' &&
+    Boolean(getPending(state).you) &&
+    you.hand.length > 0 &&
+    !state.switcherooArmed
+  )
 }
