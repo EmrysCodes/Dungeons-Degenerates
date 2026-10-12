@@ -1,7 +1,7 @@
 import { CardView } from './CardView'
 import { getItem } from '../data/items'
-import type { GameState } from '../game/types'
-import { LOOT_TO_WIN, PLAYER_ORDER } from '../game/types'
+import type { GameState, PlayerId } from '../game/types'
+import { LOOT_TO_WIN } from '../game/types'
 import {
   canJudge,
   canUseReckless,
@@ -22,6 +22,42 @@ interface Props {
   onUseItem: (uid: string) => void
 }
 
+function SeatChip({
+  name,
+  role,
+  gold,
+  loot,
+  isJudge,
+  isWinner,
+  isYou,
+}: {
+  name: string
+  role: string
+  gold: number
+  loot: number
+  isJudge: boolean
+  isWinner: boolean
+  isYou?: boolean
+}) {
+  return (
+    <div className={`seat-chip ${isJudge ? 'is-judge' : ''} ${isWinner ? 'is-winner' : ''} ${isYou ? 'is-you' : ''}`}>
+      <div className="seat-top">
+        <span className="seat-name">{name}</span>
+        <span className="role-chip">{role}</span>
+      </div>
+      <div className="seat-bottom">
+        <span className="gold-chip">{gold}g</span>
+        <span className="score-loot" aria-label={`${loot} loot tokens`}>
+          {Array.from({ length: LOOT_TO_WIN }).map((_, i) => (
+            <span key={i} className={`loot-token ${i < loot ? 'filled' : ''}`} />
+          ))}
+        </span>
+        {isJudge && <span className="judge-flag">Judge</span>}
+      </div>
+    </div>
+  )
+}
+
 export function GameTable({
   state,
   onPlayCard,
@@ -39,18 +75,19 @@ export function GameTable({
   const submitted = submittedCount(state)
   const expected = expectedSubmitters(state)
   const you = state.players.you
+  const rivals = (['ai1', 'ai2'] as PlayerId[]).map((id) => state.players[id])
 
   return (
-    <section className="game-table">
-      <header className="top-bar">
-        <div className="top-left">
+    <section className={`game-table ${judging ? 'is-judging' : ''}`}>
+      <header className="table-rail">
+        <div className="rail-left">
           <span className="round-pill">Round {state.round}</span>
           <span className={`judge-pill ${judging ? 'judge-active' : ''}`}>
-            Judge: <strong>{judge.name}</strong>
+            Judge <strong>{judge.name}</strong>
           </span>
         </div>
-        <div className="brand-mini">Dungeons &amp; Degenerates</div>
-        <div className="top-actions">
+        <p className="brand-mark">Dungeons &amp; Degenerates</p>
+        <div className="rail-right">
           <button type="button" className="btn btn-ghost btn-sm" onClick={onHowTo}>
             Rules
           </button>
@@ -60,175 +97,135 @@ export function GameTable({
         </div>
       </header>
 
-      <div className="score-strip" aria-label="Scoreboard">
-        {PLAYER_ORDER.map((id) => {
-          const p = state.players[id]
-          const isJudge = state.judgeId === id
-          const isWinner = showWinnerName && state.lastWinner === id
-          return (
-            <div
-              key={id}
-              className={`score-chip ${isJudge ? 'is-judge' : ''} ${isWinner ? 'is-winner' : ''}`}
-            >
-              <span className="score-name">{p.name}</span>
-              <span className="role-chip">{p.role.name}</span>
-              <span className="gold-chip">{p.gold}g</span>
-              <span className="score-loot">
-                {Array.from({ length: LOOT_TO_WIN }).map((_, i) => (
-                  <span key={i} className={`loot-token ${i < p.loot ? 'filled' : ''}`} />
-                ))}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="scenario-zone">
-        <CardView card={state.scenario} variant="scenario" size="lg" className="scenario-card" />
-        <p className="status-line" key={state.statusText}>
-          {state.statusText}
-        </p>
-        {judging && (
-          <div className="judge-banner" role="status">
-            <strong>Pick the winner</strong>
-            <span>Tap an Option below — only you decide this round.</span>
-          </div>
-        )}
-      </div>
-
-      <div className="opponents-row">
-        {(['ai1', 'ai2'] as const).map((id) => {
-          const p = state.players[id]
-          const isJudge = state.judgeId === id
-          return (
-            <article key={id} className={`player-panel ${isJudge ? 'is-judge' : ''}`}>
-              <header>
-                <h3>{p.name}</h3>
-                <span className="role-chip">{p.role.name}</span>
-              </header>
-              <p className="perk">{p.role.perk}</p>
-              <p className="perk-effect">{p.role.effect}</p>
-              <div className="panel-meta">
-                <span>Loot {p.loot}/{LOOT_TO_WIN}</span>
-                <span>{p.gold}g</span>
-                <span>Hand {p.hand.length}</span>
-                {isJudge && <span className="judge-flag">Judging</span>}
-              </div>
-            </article>
-          )
-        })}
-      </div>
-
-      <div className={`play-area ${judging ? 'judging-mode' : ''}`} aria-label="Anonymous submissions">
-        {state.submissions.length === 0 && (
-          <div className="played-slot empty-hint">
-            <div className="empty-slot-card">
-              <span>Waiting for submissions…</span>
-              <span className="muted">
-                {submitted}/{expected} in
-              </span>
-            </div>
-          </div>
-        )}
-        {state.submissions.map((slot, index) => {
-          const faceDown = !slot.revealed
-          const clickable = judging && slot.revealed
-          const isWinning = showWinnerName && state.lastWinningSlotId === slot.slotId
-          const optionLabel = `Option ${String.fromCharCode(65 + index)}`
-          const label = faceDown
-            ? `Submission ${index + 1}`
-            : showWinnerName && isWinning
-              ? state.players[slot.ownerId].name
-              : optionLabel
-
-          return (
-            <div
-              key={slot.slotId}
-              className={`played-slot ${isWinning ? 'winning-slot' : ''} ${clickable ? 'pickable' : ''}`}
-            >
-              <CardView
-                card={slot.card}
-                variant={faceDown ? 'back' : 'action'}
-                faceDown={faceDown}
-                size="md"
-                label={label}
-                selected={clickable}
-                onClick={clickable ? () => onJudgeSlot(slot.slotId) : undefined}
-                className={clickable ? 'judge-target' : ''}
-              />
-              {clickable && (
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm pick-winner-btn"
-                  onClick={() => onJudgeSlot(slot.slotId)}
-                >
-                  Crown {optionLabel}
-                </button>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      <footer className="player-zone">
-        <div className="player-header">
-          <div>
-            <h3>
-              You · {you.role.name}
-              {state.judgeId === 'you' ? ' · Judge' : ''} · {you.gold}g
-            </h3>
-            <p className="perk">{you.role.perk}</p>
-            <p className="perk-effect">{you.role.effect}</p>
-          </div>
-          <div className="loot-meter" aria-label="Your loot tokens">
-            {Array.from({ length: LOOT_TO_WIN }).map((_, i) => (
-              <span key={i} className={`loot-token ${i < you.loot ? 'filled' : ''}`} />
-            ))}
-          </div>
+      <div className="table-felt">
+        <div className="rival-row">
+          {rivals.map((p) => (
+            <SeatChip
+              key={p.id}
+              name={p.name}
+              role={p.role.name}
+              gold={p.gold}
+              loot={p.loot}
+              isJudge={state.judgeId === p.id}
+              isWinner={showWinnerName && state.lastWinner === p.id}
+            />
+          ))}
         </div>
 
-        <div className="perk-bar">
+        <div className="table-center">
+          <div className="scenario-stage">
+            <p className="stage-label">Scenario</p>
+            <CardView card={state.scenario} variant="scenario" size="lg" className="scenario-card" />
+          </div>
+
+          <div className={`submission-stage ${judging ? 'judging-mode' : ''}`}>
+            <p className="stage-label">
+              {judging ? 'Crown a winner' : 'Submissions'}
+            </p>
+            <p className="status-line" key={state.statusText}>
+              {state.statusText}
+            </p>
+
+            <div className="play-area" aria-label="Anonymous submissions">
+              {state.submissions.length === 0 && (
+                <div className="empty-slot-card">
+                  <span>Waiting for plays…</span>
+                  <span className="muted">
+                    {submitted}/{expected}
+                  </span>
+                </div>
+              )}
+              {state.submissions.map((slot, index) => {
+                const faceDown = !slot.revealed
+                const clickable = judging && slot.revealed
+                const isWinning = showWinnerName && state.lastWinningSlotId === slot.slotId
+                const optionLabel = `Option ${String.fromCharCode(65 + index)}`
+                const label = faceDown
+                  ? `Face down`
+                  : showWinnerName && isWinning
+                    ? state.players[slot.ownerId].name
+                    : optionLabel
+
+                return (
+                  <div
+                    key={slot.slotId}
+                    className={`played-slot ${isWinning ? 'winning-slot' : ''} ${clickable ? 'pickable' : ''}`}
+                  >
+                    <CardView
+                      card={slot.card}
+                      variant={faceDown ? 'back' : 'action'}
+                      faceDown={faceDown}
+                      size={judging ? 'lg' : 'md'}
+                      label={label}
+                      selected={clickable}
+                      onClick={clickable ? () => onJudgeSlot(slot.slotId) : undefined}
+                      className={clickable ? 'judge-target' : ''}
+                    />
+                    {clickable && (
+                      <button
+                        type="button"
+                        className="btn btn-primary pick-winner-btn"
+                        onClick={() => onJudgeSlot(slot.slotId)}
+                      >
+                        Crown {optionLabel}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer className="player-dock">
+        <div className="dock-meta">
+          <SeatChip
+            name="You"
+            role={you.role.name}
+            gold={you.gold}
+            loot={you.loot}
+            isJudge={state.judgeId === 'you'}
+            isWinner={showWinnerName && state.lastWinner === 'you'}
+            isYou
+          />
+          <p className="dock-perk" title={you.role.effect}>
+            <em>{you.role.perk}</em>
+            <span>{you.role.effect}</span>
+          </p>
+        </div>
+
+        <div className="dock-tools">
           {canUseReckless(state) && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={onReckless}>
-              Use Reckless Draw
+              Reckless Draw
             </button>
           )}
           {canUseSwitcheroo(state) && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={onSwitcheroo}>
-              Use Switcheroo
+              Switcheroo
             </button>
           )}
-          {state.recklessDiscardPending && (
-            <span className="perk-armed">Tap a hand card to discard…</span>
-          )}
-          {state.switcherooArmed && (
-            <span className="perk-armed">Tap a hand card to swap…</span>
-          )}
+          {state.recklessDiscardPending && <span className="perk-armed">Tap a card to discard</span>}
+          {state.switcherooArmed && <span className="perk-armed">Tap a card to swap</span>}
+          {you.items.filter((i) => !i.used).map((owned) => {
+            const def = getItem(owned.itemId)
+            const usable = def.kind === 'consumable'
+            return (
+              <button
+                key={owned.uid}
+                type="button"
+                className={`inv-chip ${usable ? '' : 'passive'}`}
+                disabled={!usable}
+                title={def.description}
+                onClick={() => usable && onUseItem(owned.uid)}
+              >
+                <strong>{def.name}</strong>
+                <span>{def.kind === 'passive' ? 'passive' : 'use'}</span>
+              </button>
+            )
+          })}
         </div>
-
-        {you.items.filter((i) => !i.used).length > 0 && (
-          <div className="inventory-row" aria-label="Your items">
-            {you.items
-              .filter((i) => !i.used)
-              .map((owned) => {
-                const def = getItem(owned.itemId)
-                const usable = def.kind === 'consumable'
-                return (
-                  <button
-                    key={owned.uid}
-                    type="button"
-                    className={`inv-chip ${usable ? '' : 'passive'}`}
-                    disabled={!usable}
-                    title={def.description}
-                    onClick={() => usable && onUseItem(owned.uid)}
-                  >
-                    <strong>{def.name}</strong>
-                    <span>{def.kind === 'passive' ? 'passive' : 'use'}</span>
-                  </button>
-                )
-              })}
-          </div>
-        )}
 
         <div className={`hand ${!playable ? 'locked' : ''} ${judging ? 'dimmed-hand' : ''}`}>
           {you.hand.map((card, index) => (
@@ -243,13 +240,12 @@ export function GameTable({
             />
           ))}
         </div>
-        {state.judgeId === 'you' && state.phase !== 'judging' && state.phase !== 'victory' && (
-          <p className="hand-hint">You are judging — no Action this round. Identities stay hidden.</p>
+
+        {state.judgeId === 'you' && !judging && state.phase !== 'victory' && (
+          <p className="hand-hint">Judging this round — your hand rests while others play.</p>
         )}
         {judging && (
-          <p className="hand-hint judge-hint">
-            Explicit pick required: use <strong>Crown Option A/B</strong> or tap a glowing card.
-          </p>
+          <p className="hand-hint judge-hint">Tap a glowing option or use Crown — identities stay hidden.</p>
         )}
       </footer>
     </section>

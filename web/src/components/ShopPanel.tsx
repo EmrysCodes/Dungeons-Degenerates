@@ -13,37 +13,46 @@ export function ShopPanel({ state, onBuy, onLeave }: Props) {
   return (
     <section className="shop-overlay">
       <div className="shop-panel">
-        <p className="victory-kicker">Between rounds</p>
-        <h2>Tavern Shop</h2>
-        <p className="shop-gold">Your purse: <strong>{gold}g</strong></p>
-        <p className="howto-note">{state.lastRewardText}</p>
+        <header className="shop-hero">
+          <p className="victory-kicker">Between rounds</p>
+          <h2>Tavern Shop</h2>
+          <p className="shop-gold">
+            Your purse <strong>{gold}g</strong>
+          </p>
+          {state.lastRewardText && <p className="shop-reward">{state.lastRewardText}</p>}
+        </header>
+
         <div className="shop-grid">
           {state.shopOffers.map((id) => {
             const item = getItem(id)
             const canAfford = gold >= item.cost
             return (
-              <article key={id} className="shop-card">
+              <article key={id} className={`shop-card ${canAfford ? '' : 'broke'}`}>
                 <header>
                   <h3>{item.name}</h3>
                   <span className="shop-price">{item.cost}g</span>
                 </header>
                 <p>{item.description}</p>
-                <span className="role-chip">{item.kind}</span>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  disabled={!canAfford}
-                  onClick={() => onBuy(id)}
-                >
-                  {canAfford ? 'Buy' : 'Too broke'}
-                </button>
+                <div className="shop-card-foot">
+                  <span className="role-chip">{item.kind}</span>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    disabled={!canAfford}
+                    onClick={() => onBuy(id)}
+                  >
+                    {canAfford ? 'Buy' : 'Broke'}
+                  </button>
+                </div>
               </article>
             )
           })}
         </div>
+
         {state.shopOffers.length === 0 && (
-          <p className="howto-note">Shelf is empty. The merchant has fled.</p>
+          <p className="howto-note">The merchant packed up. Nothing left but regret.</p>
         )}
+
         <button type="button" className="btn btn-ghost" onClick={onLeave}>
           Leave shop · next round
         </button>
