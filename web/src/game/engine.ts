@@ -1,6 +1,7 @@
 import actions from '../data/actions.json'
 import scenarios from '../data/scenarios.json'
-import { ROLES, type Role } from '../data/roles'
+import { EXTRA_ACTIONS, EXTRA_SCENARIOS } from '../data/extras'
+import { ROLES, type Role, type RoleId } from '../data/roles'
 import {
   ITEM_CATALOG,
   LOOT_DROP_POOL,
@@ -79,9 +80,37 @@ function drawMany(
   return { cards, pile: nextPile, discard: nextDiscard }
 }
 
-function assignRoles(): Record<PlayerId, Role> {
+function buildMasterDecks(): { actions: CardData[]; scenarios: CardData[] } {
+  const baseActions = cloneCards(actions as CardData[])
+  const baseScenarios = cloneCards(scenarios as CardData[])
+  const extrasA: CardData[] = EXTRA_ACTIONS.map((c, i) => ({
+    id: 1000 + i,
+    text: c.text,
+    image: 'text',
+  }))
+  const extrasS: CardData[] = EXTRA_SCENARIOS.map((c, i) => ({
+    id: 2000 + i,
+    text: c.text,
+    image: 'text',
+  }))
+  return {
+    actions: [...baseActions, ...extrasA],
+    scenarios: [...baseScenarios, ...extrasS],
+  }
+}
+
+function assignRoles(preferred?: RoleId | null): Record<PlayerId, Role> {
+  if (preferred) {
+    const yours = ROLES.find((r) => r.id === preferred) ?? ROLES[0]
+    const rest = shuffle(ROLES.filter((r) => r.id !== yours.id))
+    return { you: yours, ai1: rest[0], ai2: rest[1] }
+  }
   const roles = shuffle(ROLES)
   return { you: roles[0], ai1: roles[1], ai2: roles[2] }
+}
+
+export interface MatchOptions {
+  playerRole?: RoleId | null
 }
 
 function nextJudge(current: PlayerId): PlayerId {
@@ -105,6 +134,7 @@ function emptyPlayer(id: PlayerId, name: string): PlayerState {
     perkUsedThisRound: false,
     tipJudgeActive: false,
     insuranceArmed: false,
+    echoCharmArmed: false,
   }
 }
 
@@ -144,13 +174,14 @@ export function createInitialState(): GameState {
   }
 }
 
-export function startMatch(): GameState {
+export function startMatch(options: MatchOptions = {}): GameState {
   uidCounter = 0
-  const roles = assignRoles()
-  const actionMaster = cloneCards(actions as CardData[])
-  const scenarioMaster = cloneCards(scenarios as CardData[])
-  let actionPile = shuffle(actionMaster)
-  let scenarioPile = shuffle(scenarioMaster)
+  const roles = assignRoles(options.playerRole)
+  const masters = buildMasterDecks()
+  const actionMaster = masters.actions
+  const scenarioMaster = masters.scenarios
+  let actionPile = shuffle(cloneCards(actionMaster))
+  let scenarioPile = shuffle(cloneCards(scenarioMaster))
   const actionDiscard: CardData[] = []
 
   const names: Record<PlayerId, string> = {
@@ -174,6 +205,7 @@ export function startMatch(): GameState {
       perkUsedThisRound: false,
       tipJudgeActive: false,
       insuranceArmed: false,
+      echoCharmArmed: false,
     }
   }
 
@@ -187,6 +219,30 @@ export function startMatch(): GameState {
     scenarioDiscard: [],
     statusText: 'Dealing chaos…',
   })
+}
+
+export function deckCounts() {
+  const masters = buildMasterDecks()
+  return {
+    actions: masters.actions.length,
+    scenarios: masters.scenarios.length,
+    items: ITEM_CATALOG.length,
+  }
+}
+
+function actionMasterDeck(): CardData[] {
+  return buildMasterDecks().actions
+}
+
+function scenarioMasterDeck(): CardData[] {
+  return buildMasterDecks().scenarios
+}
+
+function effectiveShopCost(player: PlayerState, base: number): number {
+  if (player.items.some((i) => i.itemId === 'silver_tongue' && !i.used)) {
+    return Math.max(1, base - 1)
+  }
+  return base
 }
 
 type PendingPlays = Partial<Record<PlayerId, CardData>>
@@ -211,7 +267,7 @@ function setPending(state: GameState, pending: PendingPlays): GameState {
 }
 
 export function beginRound(state: GameState): GameState {
-  const scenarioMaster = scenarios as CardData[]
+  const scenarioMaster = scenarioMasterDeck()
   let scenarioDiscard = state.scenarioDiscard
   if (state.scenario) {
     scenarioDiscard = [...scenarioDiscard, state.scenario]
@@ -236,6 +292,7 @@ export function beginRound(state: GameState): GameState {
       perkUsedThisRound: false,
       tipJudgeActive: false,
       insuranceArmed: false,
+      echoCharmArmed: false,
     }
   }
 
@@ -268,7 +325,7 @@ export function autoPlayNonJudges(state: GameState): GameState {
   let players = { ...state.players }
   let actionPile = state.actionPile
   let actionDiscard = state.actionDiscard
-  const master = actions as CardData[]
+  const master = actionMasterDeck()
 
   for (const id of participants(state.judgeId)) {
     if (id === 'you') continue
@@ -393,7 +450,7 @@ function confirmRecklessDiscard(state: GameState, handIndex: number): GameState 
   const hand = [...you.hand]
   const [trashed] = hand.splice(handIndex, 1)
   let actionDiscard = [...state.actionDiscard, trashed]
-  const drawn = drawMany(state.actionPile, actionDiscard, actions as CardData[], 2)
+  const drawn = drawMany(state.actionPile, actionDiscard, actionMasterDeck(), 2)
   return {
     ...state,
     actionPile: drawn.pile,
@@ -529,7 +586,7 @@ export function aiJudgePick(state: GameState): GameState {
     for (const funny of ['seduce', 'chair', 'blame', 'drink', 'fake', 'curse', 'scream', 'gold']) {
       if (text.includes(funny)) score += 0.4
     }
-    if (state.players[s.ownerId].tipJudgeActive) score += 3.5
+    if (state.players[s.ownerId].tipJudgeActive) score += 5
     return { slot: s, score }
   })
   scored.sort((a, b) => b.score - a.score)
@@ -542,18 +599,34 @@ function finalizeWinner(state: GameState, winnerId: PlayerId, slotId: string): G
   let goldGain = ROUND_WIN_GOLD
   const rewardBits: string[] = [`+${ROUND_WIN_GOLD}g`, '+1 Loot Token']
 
-  // Heirloom Dagger passive
+  // Passives on win
   if (winner.items.some((i) => i.itemId === 'heirloom_dagger' && !i.used)) {
     goldGain += 1
     rewardBits.push('+1g dagger')
   }
-  // Bard Crowd Favorite
+  if (winner.items.some((i) => i.itemId === 'crowbar_of_destiny' && !i.used)) {
+    goldGain += 1
+    rewardBits.push('+1g crowbar')
+  }
+  // Bard Crowd Favorite + Charm Amulet draws
   let actionPile = state.actionPile
   let actionDiscard = state.actionDiscard
+  let drawBonus = 0
   if (winner.role.id === 'bard') {
     goldGain += 2
     rewardBits.push('+2g bard encore')
-    const drawn = drawMany(actionPile, actionDiscard, actions as CardData[], 1)
+    drawBonus += 1
+  }
+  if (winner.items.some((i) => i.itemId === 'charm_amulet' && !i.used)) {
+    drawBonus += 1
+    rewardBits.push('+1 card charm')
+  }
+  if (winner.echoCharmArmed) {
+    drawBonus += 1
+    rewardBits.push('+1 card echo')
+  }
+  if (drawBonus > 0) {
+    const drawn = drawMany(actionPile, actionDiscard, actionMasterDeck(), drawBonus)
     actionPile = drawn.pile
     actionDiscard = drawn.discard
     players[winnerId] = {
@@ -643,16 +716,25 @@ export function buyShopItem(state: GameState, itemId: ItemId): GameState {
   if (!state.shopOffers.includes(itemId)) return state
   const def = getItem(itemId)
   const you = state.players.you
-  if (you.gold < def.cost) return state
+  const cost = effectiveShopCost(you, def.cost)
+  if (you.gold < cost) return state
+  let nextYou = grantItem({ ...you, gold: you.gold - cost }, itemId)
+  if (nextYou.items.some((i) => i.itemId === 'mimic_tooth' && !i.used)) {
+    nextYou = { ...nextYou, gold: nextYou.gold + 1 }
+  }
   return {
     ...state,
     players: {
       ...state.players,
-      you: grantItem({ ...you, gold: you.gold - def.cost }, itemId),
+      you: nextYou,
     },
     shopOffers: state.shopOffers.filter((id) => id !== itemId),
-    statusText: `Bought ${def.name}. What could go wrong?`,
+    statusText: `Bought ${def.name} for ${cost}g. What could go wrong?`,
   }
+}
+
+export function shopCostFor(state: GameState, itemId: ItemId): number {
+  return effectiveShopCost(state.players.you, getItem(itemId).cost)
 }
 
 export function leaveShop(state: GameState): GameState {
@@ -663,7 +745,7 @@ export function leaveShop(state: GameState): GameState {
 export function advanceAfterRound(state: GameState): GameState {
   if (state.phase !== 'roundResult') return state
 
-  const actionMaster = actions as CardData[]
+  const actionMaster = actionMasterDeck()
   let actionPile = state.actionPile
   let actionDiscard = state.actionDiscard
   const players = { ...state.players }
@@ -710,7 +792,7 @@ export function usePlayerItem(state: GameState, uid: string): GameState {
 
   switch (owned.itemId) {
     case 'tavern_tab': {
-      const drawn = drawMany(state.actionPile, state.actionDiscard, actions as CardData[], 2)
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 2)
       next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
       player = { ...player, hand: [...player.hand, ...drawn.cards] }
       next.statusText = 'Tavern Tab: +2 Actions. The bartender looks concerned.'
@@ -742,7 +824,7 @@ export function usePlayerItem(state: GameState, uid: string): GameState {
     }
     case 'lucky_coin': {
       let actionDiscard = [...state.actionDiscard, ...player.hand]
-      const drawn = drawMany(state.actionPile, actionDiscard, actions as CardData[], HAND_SIZE)
+      const drawn = drawMany(state.actionPile, actionDiscard, actionMasterDeck(), HAND_SIZE)
       next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
       player = { ...player, hand: drawn.cards }
       next.statusText = 'Lucky Coin flip — new hand of chaos.'
@@ -751,6 +833,79 @@ export function usePlayerItem(state: GameState, uid: string): GameState {
     case 'smoke_bomb': {
       player = { ...player, gold: player.gold + 2 }
       next.statusText = 'Smoke Bomb sold to a goblin for 2g. Textbook degeneracy.'
+      break
+    }
+    case 'pocket_sand': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 1)
+      next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
+      player = { ...player, hand: [...player.hand, ...drawn.cards], gold: player.gold + 1 }
+      next.statusText = 'Pocket Sand: +1 card, +1g. Eyes everywhere.'
+      break
+    }
+    case 'loaded_dice': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 3)
+      let hand = [...player.hand, ...drawn.cards]
+      let actionDiscard = drawn.discard
+      if (hand.length > 0) {
+        const toss = Math.floor(Math.random() * hand.length)
+        const [trashed] = hand.splice(toss, 1)
+        actionDiscard = [...actionDiscard, trashed]
+      }
+      next = { ...next, actionPile: drawn.pile, actionDiscard }
+      player = { ...player, hand }
+      next.statusText = 'Loaded Dice: drew 3, tossed 1. Totally fair.'
+      break
+    }
+    case 'emergency_ale': {
+      player = { ...player, gold: player.gold + 1 }
+      next.statusText = 'Emergency Ale: +1g. Courage tastes like regret.'
+      break
+    }
+    case 'wanted_poster': {
+      player = { ...player, gold: player.gold + 4 }
+      next.statusText = 'Wanted Poster cashed in for 4g. Lay low.'
+      break
+    }
+    case 'flask_of_courage': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 1)
+      next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
+      player = { ...player, hand: [...player.hand, ...drawn.cards], tipJudgeActive: true }
+      next.statusText = 'Flask of Courage: +1 card and a wink at the judge.'
+      break
+    }
+    case 'bargain_bin_wand': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 2)
+      let hand = [...player.hand, ...drawn.cards]
+      let actionDiscard = drawn.discard
+      if (hand.length > 0) {
+        const toss = Math.floor(Math.random() * hand.length)
+        const [trashed] = hand.splice(toss, 1)
+        actionDiscard = [...actionDiscard, trashed]
+      }
+      next = { ...next, actionPile: drawn.pile, actionDiscard }
+      player = { ...player, hand }
+      next.statusText = 'Bargain-Bin Wand: sparks, then a sneeze.'
+      break
+    }
+    case 'ration_of_regret': {
+      player = { ...player, gold: player.gold + 2 }
+      next.statusText = 'Ration of Regret: +2g. Still tastes like ash.'
+      break
+    }
+    case 'bribe_purse': {
+      player = { ...player, tipJudgeActive: true }
+      next.statusText = 'Bribe Purse emptied under the table. The scales tip.'
+      break
+    }
+    case 'echo_charm': {
+      const drawn = drawMany(state.actionPile, state.actionDiscard, actionMasterDeck(), 1)
+      next = { ...next, actionPile: drawn.pile, actionDiscard: drawn.discard }
+      player = {
+        ...player,
+        hand: [...player.hand, ...drawn.cards],
+        echoCharmArmed: true,
+      }
+      next.statusText = 'Echo Charm: +1 card now, +1 more if you win.'
       break
     }
     default:

@@ -1,4 +1,5 @@
 import { getItem, type ItemId } from '../data/items'
+import { shopCostFor } from '../game/engine'
 import type { GameState } from '../game/types'
 
 interface Props {
@@ -25,12 +26,15 @@ export function ShopPanel({ state, onBuy, onLeave }: Props) {
         <div className="shop-grid">
           {state.shopOffers.map((id) => {
             const item = getItem(id)
-            const canAfford = gold >= item.cost
+            const cost = shopCostFor(state, id)
+            const canAfford = gold >= cost
             return (
               <article key={id} className={`shop-card ${canAfford ? '' : 'broke'}`}>
                 <header>
                   <h3>{item.name}</h3>
-                  <span className="shop-price">{item.cost}g</span>
+                  <span className="shop-price">
+                    {cost}g{cost !== item.cost ? ` (−1)` : ''}
+                  </span>
                 </header>
                 <p>{item.description}</p>
                 <div className="shop-card-foot">

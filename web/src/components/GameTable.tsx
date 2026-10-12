@@ -13,9 +13,11 @@ import {
 
 interface Props {
   state: GameState
+  showPerkDetails?: boolean
   onPlayCard: (index: number) => void
   onJudgeSlot: (slotId: string) => void
-  onRestart: () => void
+  onMenu: () => void
+  onInventory: () => void
   onHowTo: () => void
   onReckless: () => void
   onSwitcheroo: () => void
@@ -60,9 +62,11 @@ function SeatChip({
 
 export function GameTable({
   state,
+  showPerkDetails = true,
   onPlayCard,
   onJudgeSlot,
-  onRestart,
+  onMenu,
+  onInventory,
   onHowTo,
   onReckless,
   onSwitcheroo,
@@ -88,11 +92,14 @@ export function GameTable({
         </div>
         <p className="brand-mark">Dungeons &amp; Degenerates</p>
         <div className="rail-right">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onInventory}>
+            Pack
+          </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={onHowTo}>
             Rules
           </button>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onRestart}>
-            Restart
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onMenu}>
+            Menu
           </button>
         </div>
       </header>
@@ -119,9 +126,7 @@ export function GameTable({
           </div>
 
           <div className={`submission-stage ${judging ? 'judging-mode' : ''}`}>
-            <p className="stage-label">
-              {judging ? 'Crown a winner' : 'Submissions'}
-            </p>
+            <p className="stage-label">{judging ? 'Crown a winner' : 'Submissions'}</p>
             <p className="status-line" key={state.statusText}>
               {state.statusText}
             </p>
@@ -141,7 +146,7 @@ export function GameTable({
                 const isWinning = showWinnerName && state.lastWinningSlotId === slot.slotId
                 const optionLabel = `Option ${String.fromCharCode(65 + index)}`
                 const label = faceDown
-                  ? `Face down`
+                  ? 'Face down'
                   : showWinnerName && isWinning
                     ? state.players[slot.ownerId].name
                     : optionLabel
@@ -189,10 +194,12 @@ export function GameTable({
             isWinner={showWinnerName && state.lastWinner === 'you'}
             isYou
           />
-          <p className="dock-perk" title={you.role.effect}>
-            <em>{you.role.perk}</em>
-            <span>{you.role.effect}</span>
-          </p>
+          {showPerkDetails && (
+            <p className="dock-perk" title={you.role.effect}>
+              <em>{you.role.perk}</em>
+              <span>{you.role.effect}</span>
+            </p>
+          )}
         </div>
 
         <div className="dock-tools">
@@ -208,23 +215,26 @@ export function GameTable({
           )}
           {state.recklessDiscardPending && <span className="perk-armed">Tap a card to discard</span>}
           {state.switcherooArmed && <span className="perk-armed">Tap a card to swap</span>}
-          {you.items.filter((i) => !i.used).map((owned) => {
-            const def = getItem(owned.itemId)
-            const usable = def.kind === 'consumable'
-            return (
-              <button
-                key={owned.uid}
-                type="button"
-                className={`inv-chip ${usable ? '' : 'passive'}`}
-                disabled={!usable}
-                title={def.description}
-                onClick={() => usable && onUseItem(owned.uid)}
-              >
-                <strong>{def.name}</strong>
-                <span>{def.kind === 'passive' ? 'passive' : 'use'}</span>
-              </button>
-            )
-          })}
+          {you.items
+            .filter((i) => !i.used)
+            .slice(0, 4)
+            .map((owned) => {
+              const def = getItem(owned.itemId)
+              const usable = def.kind === 'consumable'
+              return (
+                <button
+                  key={owned.uid}
+                  type="button"
+                  className={`inv-chip ${usable ? '' : 'passive'}`}
+                  disabled={!usable}
+                  title={def.description}
+                  onClick={() => usable && onUseItem(owned.uid)}
+                >
+                  <strong>{def.name}</strong>
+                  <span>{def.kind === 'passive' ? 'passive' : 'use'}</span>
+                </button>
+              )
+            })}
         </div>
 
         <div className={`hand ${!playable ? 'locked' : ''} ${judging ? 'dimmed-hand' : ''}`}>

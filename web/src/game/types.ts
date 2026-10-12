@@ -30,6 +30,8 @@ export interface PlayerState {
   tipJudgeActive: boolean
   /** Insurance armed this round */
   insuranceArmed: boolean
+  /** Echo Charm: extra draw if you win this round */
+  echoCharmArmed: boolean
 }
 
 /** Anonymous table slot — owner is hidden until a winner is named. */

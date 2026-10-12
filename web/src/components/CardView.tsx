@@ -27,21 +27,34 @@ export function CardView({
 }: Props) {
   const isButton = Boolean(onClick) && !disabled
   const Tag = isButton ? 'button' : 'div'
-  const imgSrc = faceDown || variant === 'back' || !card
-    ? '/cards/card-back.png'
-    : variant === 'scenario'
-      ? `/cards/scenario/${card.image}`
-      : `/cards/action/${card.image}`
+  const showBack = faceDown || variant === 'back' || !card
+  const isTextCard = Boolean(card && (!card.image || card.image === 'text'))
 
   return (
     <Tag
       type={isButton ? 'button' : undefined}
-      className={`card-view size-${size} variant-${variant} ${selected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${faceDown ? 'face-down' : ''} ${className}`}
+      className={`card-view size-${size} variant-${variant} ${selected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${faceDown ? 'face-down' : ''} ${isTextCard && !showBack ? 'text-card' : ''} ${className}`}
       onClick={isButton ? onClick : undefined}
       disabled={isButton ? disabled : undefined}
       aria-label={card?.text ?? label ?? 'Card'}
     >
-      <img src={imgSrc} alt={faceDown ? 'Face-down card' : (card?.text ?? 'Card back')} draggable={false} />
+      {showBack ? (
+        <img src="/cards/card-back.png" alt="Face-down card" draggable={false} />
+      ) : isTextCard ? (
+        <div className={`card-text-face ${variant === 'scenario' ? 'scenario-face' : 'action-face'}`}>
+          <p>{card!.text}</p>
+        </div>
+      ) : (
+        <img
+          src={
+            variant === 'scenario'
+              ? `/cards/scenario/${card!.image}`
+              : `/cards/action/${card!.image}`
+          }
+          alt={card!.text}
+          draggable={false}
+        />
+      )}
       {label && <span className="card-slot-label">{label}</span>}
     </Tag>
   )
